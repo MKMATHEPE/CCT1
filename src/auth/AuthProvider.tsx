@@ -3,54 +3,66 @@ import type { ReactNode } from "react";
 import { AuthContext } from "./authContext";
 import type { User } from "./authContext";
 import { writeAuditLog } from "../services/auditLogService";
+import {
+  clearStoredSession,
+  getStoredSessionUser,
+  storeSession,
+  type StoredSession,
+} from "./sessionUser";
+import { fetchCurrentSession, logoutSession } from "../services/authService";
 
 type Props = {
   children: ReactNode;
 };
 
 export function AuthProvider({ children }: Props) {
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(() => {
-    const isLoggedOut =
-      sessionStorage.getItem("cct:logged-out") === "true";
-
-    if (isLoggedOut) {
-      return null;
-    }
-
-    const savedRole =
-      (sessionStorage.getItem("cct:demo-role") as User["role"]) ?? "analyst";
-
-    if (!sessionStorage.getItem("cct:last-login")) {
-      sessionStorage.setItem(
-        "cct:last-login",
-        new Date().toISOString()
-      );
-    }
-
-    return {
-      id: `demo-${savedRole}`,
-      name: savedRole === "manager" ? "Erin Parker" : "Sasha Harper",
-      role: savedRole,
-    };
+    return getStoredSessionUser();
   });
 
-  function login(user: User) {
-    sessionStorage.removeItem("cct:logged-out");
-    sessionStorage.setItem("cct:last-login", new Date().toISOString());
-    sessionStorage.setItem("cct:demo-role", user.role);
-    setUser(user);
+  useEffect(() => {
+    let isActive = true;
+
+    async function restoreSession() {
+      const nextUser = await fetchCurrentSession();
+
+      if (!isActive) {
+        return;
+      }
+
+      if (!nextUser) {
+        clearStoredSession();
+        setUser(null);
+      } else {
+        setUser(nextUser);
+      }
+
+      setIsLoading(false);
+    }
+
+    void restoreSession();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  function login(session: StoredSession) {
+    storeSession(session);
+    setUser(session.user);
     writeAuditLog({
-      actor: user.id,
-      actorRole: user.role,
+      actor: session.user.id,
+      actorRole: session.user.role,
       action: "LOGIN",
-      target: user.id,
+      target: session.user.id,
       outcome: "SUCCESS",
       context: "User login",
-      details: { role: user.role },
+      details: { role: session.user.role },
     });
   }
 
-  function logout() {
+  async function logout() {
     if (user) {
       writeAuditLog({
         actor: user.id,
@@ -61,7 +73,8 @@ export function AuthProvider({ children }: Props) {
         context: "User logout",
       });
     }
-    sessionStorage.setItem("cct:logged-out", "true");
+    await logoutSession();
+    clearStoredSession();
     setUser(null);
   }
 
@@ -82,7 +95,7 @@ export function AuthProvider({ children }: Props) {
   }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -117,6 +117,17 @@ export function getRegisteredDeviceBySerial(
   return registeredDevices.get(key) ?? null;
 }
 
+// simple helper to check for existing IMEI in registry
+export function isImeiRegistered(imei: string): boolean {
+  if (!imei) return false;
+  for (const device of registeredDevices.values()) {
+    if (device.imei === imei) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function createDeviceRecord(input: {
   serial: string;
   brand?: string;
@@ -210,10 +221,8 @@ export function getExistingDevices(): ExistingDeviceRow[] {
 
     entry.count += 1;
     entry.imei = claim.imei || entry.imei;
-    entry.category = entry.category;
     entry.brand = claim.brand || entry.brand;
     entry.model = claim.model || entry.model;
-    entry.age = entry.age;
     entry.lastActivityUtc = claim.timestamp ?? entry.lastActivityUtc;
     serialMap.set(serial, entry);
   });
@@ -245,7 +254,7 @@ export function getExistingDevices(): ExistingDeviceRow[] {
     serialMap.set(serial, entry);
   });
 
-  const fromClaims = Array.from(serialMap.values()).map((entry) => ({
+  const fromClaims: ExistingDeviceRow[] = Array.from(serialMap.values()).map((entry) => ({
     serial: entry.serial,
     imei: entry.imei,
     category: entry.category,
@@ -254,11 +263,11 @@ export function getExistingDevices(): ExistingDeviceRow[] {
     age: entry.age,
     claimCount: entry.count,
     lastInsurer: entry.lastInsurer ?? "Unknown",
-    status: entry.count > 1 ? "Duplicate" : "Clean",
+    status: (entry.count > 1 ? "Duplicate" : "Clean") as DeviceStatus,
     lastActivityUtc: entry.lastActivityUtc,
   }));
 
-  const fromRegistry = Array.from(deviceHistory.values()).map((entry) => ({
+  const fromRegistry: ExistingDeviceRow[] = Array.from(deviceHistory.values()).map((entry) => ({
     serial: entry.serial,
     imei: entry.imei,
     category: undefined,
@@ -268,11 +277,11 @@ export function getExistingDevices(): ExistingDeviceRow[] {
     claimCount: entry.claims.length,
     lastInsurer:
       entry.claims[0]?.insurer?.toString() ?? "Unknown",
-    status: entry.claims.length > 1 ? "Duplicate" : "Clean",
+    status: (entry.claims.length > 1 ? "Duplicate" : "Clean") as DeviceStatus,
     lastActivityUtc: entry.claims[0]?.createdAtUtc,
   }));
 
-  const fromRegistered = Array.from(registeredDevices.values()).map(
+  const fromRegistered: ExistingDeviceRow[] = Array.from(registeredDevices.values()).map(
     (entry) => ({
       serial: entry.serial,
       imei: entry.imei,
@@ -295,4 +304,15 @@ export function getExistingDevices(): ExistingDeviceRow[] {
 
 export function getDeviceHistoryBySerial(serial: string) {
   return deviceHistory.get(serial) ?? null;
+}
+
+// lookup history record using IMEI instead of serial
+export function getDeviceHistoryByImei(imei: string) {
+  if (!imei) return null;
+  for (const record of deviceHistory.values()) {
+    if (record.imei === imei) {
+      return record;
+    }
+  }
+  return null;
 }

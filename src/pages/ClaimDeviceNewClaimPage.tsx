@@ -1,614 +1,900 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import {
-  createDeviceRecord,
-  getRegisteredDeviceBySerial,
-  recordClaimForDevice,
-  type RegisteredDevice,
-} from "../services/deviceRegistryService";
-import {
-  createClaimEvent,
-  getClaimEventsBySerial,
-  getDeviceIdBySerial,
-  type ClaimDeviceEvent,
-} from "../services/claimDeviceService";
 import { writeAuditLog } from "../services/auditLogService";
+import {
+  ensureApiAvailable,
+  recordClaim,
+  refreshClaims,
+  submitBulkClaims,
+  useClaims,
+} from "../services/deviceDataService";
+
+const outcomeOptions = [
+  { value: "approved", label: "Approve" },
+  { value: "rejected", label: "Reject" },
+  { value: "pending", label: "Pending" },
+] as const;
+
+type ImportRow = Record<string, unknown>;
+type ImportError = {
+  row: number;
+  reason: string;
+};
+
+type ImportResult = {
+  processed: number;
+  duplicates: number;
+  skipped: number;
+  errors: ImportError[];
+};
+
+type XLSXModule = {
+  read: (data: Uint8Array, options: { type: "array" }) => {
+    SheetNames: string[];
+    Sheets: Record<string, unknown>;
+  };
+  utils: {
+    sheet_to_json: (
+      sheet: unknown,
+      options?: {
+        defval?: string;
+        raw?: boolean;
+      }
+    ) => ImportRow[];
+    aoa_to_sheet: (rows: string[][]) => unknown;
+    book_new: () => unknown;
+    book_append_sheet: (
+      workbook: unknown,
+      worksheet: unknown,
+      name: string
+    ) => void;
+  };
+  writeFile: (workbook: unknown, filename: string) => void;
+};
+
+declare global {
+  interface Window {
+    XLSX?: XLSXModule;
+  }
+}
+
+type ClaimPrefillState = {
+  prefillIdentifier?: string;
+  prefillMode?: "imei" | "serial" | "identifier";
+};
 
 export default function ClaimDeviceNewClaimPage() {
   const { user } = useAuth();
-  const isAnalyst = user?.role === "analyst";
-  const [serial, setSerial] = useState("");
-  const [imei, setImei] = useState("");
-  const [deviceCategory, setDeviceCategory] = useState<
-    "Mobile" | "Laptop" | "Tablet"
-  >("Mobile");
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [deviceAge, setDeviceAge] = useState<
-    "< 6 months" | "6–12 months" | "> 12 months"
-  >("< 6 months");
-  const [insurer, setInsurer] = useState<
-    "Alpha Insurance" | "Beta Assurance" | "Gamma Cover"
-  >("Alpha Insurance");
-  const [claimReference, setClaimReference] = useState("");
-  const [lossType, setLossType] = useState<
-    "Theft" | "Accidental Damage" | "Loss" | "Fire" | "Water Damage"
-  >("Theft");
+  const location = useLocation();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadProgressTimerRef = useRef<number | null>(null);
+  const [deviceName, setDeviceName] = useState("");
+  const [imeiNumber, setImeiNumber] = useState("");
+  const [serialNumber, setSerialNumber] = useState("");
+  const [claimOutcome, setClaimOutcome] = useState("");
   const [dateOfLoss, setDateOfLoss] = useState("");
-  const [claimAmount, setClaimAmount] = useState("");
-  const [outcome, setOutcome] = useState<
-    "PAID_TOTAL_LOSS" | "PAID_PARTIAL" | "REJECTED"
-  >("PAID_TOTAL_LOSS");
-  const [lookup, setLookup] = useState<{
-    serial: string;
-    exists: boolean;
-    device: RegisteredDevice | null;
-    priorClaims: ClaimDeviceEvent[];
-  } | null>(null);
-  const [result, setResult] = useState<{
-    status: "created" | "existing";
-    device: RegisteredDevice;
-  } | null>(null);
+  const [reason, setReason] = useState("");
+  const [paidOutValue, setPaidOutValue] = useState("");
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [importFileName, setImportFileName] = useState("Upload Excel file");
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStage, setUploadStage] = useState("");
+  const claims = useClaims();
+  const insurerName = user?.insurerName ?? "";
+  const prefillState = (location.state as ClaimPrefillState | null) ?? null;
 
-  const trimmedSerial = serial.trim();
-  const canSubmit = trimmedSerial.length > 0;
-  const isExisting = lookup?.exists ?? false;
-  const categoryLocked = isExisting;
-  const brandLocked = isExisting;
-  const modelLocked = isExisting;
-  const ageLocked = isExisting;
-
-  const historySummary = useMemo(() => {
-    if (!lookup) return null;
-    const insurers = Array.from(
-      new Set(lookup.priorClaims.map((e) => e.insurer ?? "Unknown"))
-    );
-    const outcomes = Array.from(
-      new Set(lookup.priorClaims.map((e) => e.outcome ?? "Unknown"))
-    );
-    return {
-      claimCount: lookup.priorClaims.length,
-      insurers,
-      outcomes,
+  useEffect(() => {
+    return () => {
+      if (uploadProgressTimerRef.current !== null) {
+        window.clearInterval(uploadProgressTimerRef.current);
+      }
     };
-  }, [lookup]);
+  }, []);
 
-  function computeLookup(nextSerial: string) {
-    const priorClaims = getClaimEventsBySerial(nextSerial);
-    const registered = getRegisteredDeviceBySerial(nextSerial);
-    const exists = Boolean(registered || priorClaims.length > 0);
-    const deviceId =
-      getDeviceIdBySerial(nextSerial) ??
-      registered?.id ??
-      `device-${nextSerial}`;
-
-    const device =
-      registered ??
-      (priorClaims[0]
-        ? {
-            id: deviceId,
-            serial: nextSerial,
-            imei: priorClaims[0].imei,
-            category: priorClaims[0].deviceCategory,
-            brand: priorClaims[0].brand,
-            model: priorClaims[0].model,
-            age: priorClaims[0].deviceAge,
-            status: "Existing",
-            registeredAtUtc: priorClaims[0].createdAtUtc,
-          }
-        : null);
-
-    return {
-      serial: nextSerial,
-      exists,
-      device,
-      priorClaims,
-    };
-  }
-
-  function handleLookup(value: string) {
-    const nextSerial = value.trim();
-    if (!nextSerial) {
-      setLookup(null);
+  useEffect(() => {
+    const prefillIdentifier = prefillState?.prefillIdentifier?.trim() ?? "";
+    if (!prefillIdentifier) {
       return;
     }
 
-    const nextLookup = computeLookup(nextSerial);
-    setLookup(nextLookup);
+    const shouldUseSerial =
+      prefillState?.prefillMode === "serial" ||
+      (prefillState?.prefillMode === "identifier" && !/^\d{14,}$/.test(prefillIdentifier));
 
-    if (nextLookup.exists && nextLookup.device) {
-      if (nextLookup.device.category) {
-        setDeviceCategory(nextLookup.device.category);
-      }
-      setBrand(nextLookup.device.brand ?? "");
-      setModel(nextLookup.device.model ?? "");
-      if (nextLookup.device.age) {
-        setDeviceAge(nextLookup.device.age);
-      }
-      if (nextLookup.device.imei && !imei) {
-        setImei(nextLookup.device.imei);
-      }
+    if (shouldUseSerial) {
+      setSerialNumber((current) => current || prefillIdentifier);
+      return;
+    }
+
+    setImeiNumber((current) => current || prefillIdentifier);
+  }, [prefillState]);
+
+  function clearUploadProgressTimer() {
+    if (uploadProgressTimerRef.current !== null) {
+      window.clearInterval(uploadProgressTimerRef.current);
+      uploadProgressTimerRef.current = null;
     }
   }
 
+  function setUploadProgressImmediate(value: number) {
+    clearUploadProgressTimer();
+    setUploadProgress(Math.max(0, Math.min(100, Math.round(value))));
+  }
+
+  function animateUploadProgress(
+    target: number,
+    options?: {
+      intervalMs?: number;
+      maxStep?: number;
+    }
+  ) {
+    clearUploadProgressTimer();
+    const safeTarget = Math.max(0, Math.min(100, Math.round(target)));
+    const intervalMs = options?.intervalMs ?? 80;
+    const maxStep = options?.maxStep ?? 2;
+
+    uploadProgressTimerRef.current = window.setInterval(() => {
+      setUploadProgress((current) => {
+        if (current >= safeTarget) {
+          clearUploadProgressTimer();
+          return current;
+        }
+
+        const remaining = safeTarget - current;
+        const step = Math.min(
+          maxStep,
+          remaining,
+          Math.max(1, Math.ceil(remaining / 8))
+        );
+
+        return current + step;
+      });
+    }, intervalMs);
+  }
+
+  function resetForm() {
+    setDeviceName("");
+    setImeiNumber("");
+    setSerialNumber("");
+    setClaimOutcome("");
+    setDateOfLoss("");
+    setReason("");
+    setPaidOutValue("");
+  }
+
+  function handlePaidOutValueChange(value: string) {
+    const sanitized = value.replace(/[^0-9.]/g, "");
+    const parts = sanitized.split(".");
+    const normalized =
+      parts.length <= 2
+        ? sanitized
+        : `${parts[0]}.${parts.slice(1).join("")}`;
+    setPaidOutValue(normalized);
+  }
+
+  async function handleSubmit() {
+    const actor = user?.id ?? "system";
+    const actorRole = user?.role ?? "unknown";
+    const trimmedInsurerName = insurerName.trim();
+    const trimmedDeviceName = deviceName.trim();
+    const trimmedImeiNumber = imeiNumber.trim();
+    const trimmedSerialNumber = serialNumber.trim();
+    const trimmedReason = reason.trim();
+    const amount = Number(paidOutValue);
+
+    setError("");
+    setSuccessMessage("");
+
+    if (
+      !trimmedDeviceName ||
+      !claimOutcome ||
+      !dateOfLoss ||
+      !trimmedReason ||
+      !paidOutValue
+    ) {
+      setError("Complete all claim fields before submitting.");
+      return;
+    }
+
+    if (!trimmedImeiNumber && !trimmedSerialNumber) {
+      setError("Enter at least one device identifier: IMEI or serial number.");
+      return;
+    }
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError("Enter a valid claim amount greater than 0.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const claim = await recordClaim({
+        insurer: trimmedInsurerName,
+        deviceName: trimmedDeviceName,
+        imei: trimmedImeiNumber,
+        serial: trimmedSerialNumber,
+        dateOfLoss,
+        reason: trimmedReason,
+        amount,
+        outcome: claimOutcome as "approved" | "rejected" | "pending",
+      });
+
+      writeAuditLog({
+        actor,
+        actorRole,
+        action: "CLAIM_RECORDED",
+        target: trimmedImeiNumber || trimmedSerialNumber,
+        outcome: "RECORDED",
+        context: "Claim recorded via Log A Claim page",
+        details: {
+          amount,
+          insurer: trimmedInsurerName,
+          deviceName: trimmedDeviceName,
+          reason: trimmedReason,
+          serial: trimmedSerialNumber,
+          outcome: claim.outcome,
+        },
+      });
+
+      await refreshClaims().catch(() => undefined);
+
+      setSuccessMessage(
+        `Claim recorded successfully. Outcome: ${claim.outcome}.`
+      );
+      resetForm();
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to record claim."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  function getXLSX() {
+    return window.XLSX;
+  }
+
+  function normalizeKey(key: string) {
+    return key.toLowerCase().replace(/[^a-z0-9]/g, "");
+  }
+
+  function getValue(row: ImportRow, keys: string[]): unknown {
+    const entries = Object.entries(row);
+
+    for (const key of keys) {
+      const directValue = row[key];
+      if (directValue !== undefined && directValue !== "") {
+        return directValue;
+      }
+
+      const normalizedTarget = normalizeKey(key);
+      const matchedEntry = entries.find(([entryKey, entryValue]) => {
+        return (
+          normalizeKey(entryKey) === normalizedTarget &&
+          entryValue !== undefined &&
+          entryValue !== ""
+        );
+      });
+
+      if (matchedEntry) {
+        return matchedEntry[1];
+      }
+    }
+
+    return undefined;
+  }
+
+  function toTrimmedString(value: unknown) {
+    return String(value ?? "").trim();
+  }
+
+  function normalizeImportedOutcome(value: string) {
+    const normalized = value.trim().toLowerCase();
+    if (normalized === "approved" || normalized === "approve") {
+      return "approved" as const;
+    }
+    if (normalized === "rejected" || normalized === "reject" || normalized === "declined") {
+      return "rejected" as const;
+    }
+    if (normalized === "pending" || normalized === "review" || normalized === "in review") {
+      return "pending" as const;
+    }
+    return undefined;
+  }
+
+  function splitDeviceNameParts(deviceName: string) {
+    const trimmed = deviceName.trim();
+    if (!trimmed) {
+      return {
+        brand: "Unknown",
+        model: "Unknown Device",
+      };
+    }
+
+    const [brand, ...modelParts] = trimmed.split(/\s+/);
+    return {
+      brand: brand || "Unknown",
+      model: modelParts.join(" ") || "Unknown Device",
+    };
+  }
+
+  function mapRow(row: ImportRow) {
+    const imeiOrSerial = toTrimmedString(
+      getValue(row, ["IMEI / Serial Number", "IMEI/Serial Number"])
+    );
+    const directImei = toTrimmedString(getValue(row, ["IMEI"]));
+    const directSerial = toTrimmedString(getValue(row, ["Serial", "Serial Number"]));
+    const deviceName = toTrimmedString(
+      getValue(row, ["Device Name / Model", "Device Name", "Model"])
+    );
+    const insurer = toTrimmedString(getValue(row, ["Insurer"]));
+    const outcome = toTrimmedString(
+      getValue(row, ["ClaimType", "Claim Outcome", "Outcome"])
+    );
+    const amount = toTrimmedString(getValue(row, ["Amount", "Claim Amount"]));
+    const dateOfLoss = toTrimmedString(
+      getValue(row, ["DateOfLoss", "Date of Loss", "Loss Date"])
+    );
+    const reason = toTrimmedString(getValue(row, ["Reason"]));
+
+    const imei = directImei || extractIMEI(imeiOrSerial);
+    const serial = directSerial || extractSerial(imeiOrSerial);
+    const deviceParts = splitDeviceNameParts(deviceName);
+
+    return {
+      imei,
+      serial,
+      deviceName,
+      brand: deviceParts.brand,
+      model: deviceParts.model,
+      insurer,
+      outcome,
+      amount,
+      dateOfLoss,
+      reason,
+    };
+  }
+
+  function extractIMEI(value: string) {
+    return value.split("\n")[0]?.trim() ?? "";
+  }
+
+  function extractSerial(value: string) {
+    return value.split("\n")[1]?.trim() ?? "";
+  }
+
+  function cleanAmount(value: string) {
+    return value.replace("R", "").replace(/\s/g, "").trim();
+  }
+
+  function parseDate(value: string) {
+    return new Date(value);
+  }
+
+  async function processImportedClaims(rows: ImportRow[]): Promise<ImportResult> {
+    await ensureApiAvailable();
+    setUploadStage("Validating rows");
+    setUploadProgressImmediate(35);
+
+    const actor = user?.id ?? "system";
+    const actorRole = user?.role ?? "unknown";
+    const result: ImportResult = {
+      processed: 0,
+      duplicates: 0,
+      skipped: 0,
+      errors: [],
+    };
+
+    function markRowAsInvalid(row: number, reason: string) {
+      result.skipped += 1;
+      result.errors.push({ row, reason });
+    }
+
+    const existingIdentifiers = new Set(
+      claims.flatMap((claim) => [claim.imei.trim(), claim.serial.trim()]).filter(Boolean)
+    );
+    const seenIdentifiers = new Set<string>();
+    const payloads: Array<{
+      insurer: string;
+      deviceName: string;
+      imei: string;
+      serial: string;
+      dateOfLoss: string;
+      reason: string;
+      amount: number;
+      outcome?: "approved" | "rejected" | "pending";
+      target: string;
+      importRow: number;
+    }> = [];
+
+    for (const [index, row] of rows.entries()) {
+      try {
+        const mappedRow = mapRow(row);
+        const rowNumber = index + 2;
+        const imei = mappedRow.imei;
+        const serial = mappedRow.serial;
+        const importedDeviceName =
+          mappedRow.deviceName || `${mappedRow.brand} ${mappedRow.model}`.trim();
+        const importedInsurer =
+          insurerName || mappedRow.insurer;
+        const importedOutcome = normalizeImportedOutcome(mappedRow.outcome);
+        const parsedDate = mappedRow.dateOfLoss
+          ? parseDate(mappedRow.dateOfLoss)
+          : new Date();
+        const amountValue = mappedRow.amount;
+        const importedReason = mappedRow.reason;
+        const finalImportReason =
+          importedReason ||
+          `Imported via bulk upload${importedOutcome ? ` (${importedOutcome})` : ""}`;
+
+        if (!imei && !serial) {
+          markRowAsInvalid(rowNumber, "Missing identifier");
+          continue;
+        }
+
+        const amount = Number(cleanAmount(amountValue).replace(/,/g, "."));
+        if (!Number.isFinite(amount) || amount <= 0) {
+          markRowAsInvalid(rowNumber, "Invalid claim amount");
+          continue;
+        }
+
+        if (mappedRow.dateOfLoss && Number.isNaN(parsedDate.getTime())) {
+          markRowAsInvalid(rowNumber, "Invalid date of loss");
+          continue;
+        }
+
+        const identifiers = [imei.trim(), serial.trim()].filter(Boolean);
+        const alreadyExists = identifiers.some((identifier) =>
+          existingIdentifiers.has(identifier)
+        );
+
+        if (alreadyExists) {
+          result.duplicates += 1;
+          continue;
+        }
+
+        const duplicateInFile = identifiers.some((identifier) =>
+          seenIdentifiers.has(identifier)
+        );
+        if (duplicateInFile) {
+          result.duplicates += 1;
+          continue;
+        }
+
+        identifiers.forEach((identifier) => seenIdentifiers.add(identifier));
+        payloads.push({
+          insurer: importedInsurer,
+          deviceName: importedDeviceName || "Unknown Device",
+          imei,
+          serial,
+          dateOfLoss: parsedDate.toISOString(),
+          reason: finalImportReason,
+          amount,
+          outcome: importedOutcome,
+          target: imei || serial,
+          importRow: index + 1,
+        });
+        const validationProgress = 35 + (((index + 1) / rows.length) * 30);
+        setUploadProgressImmediate(validationProgress);
+      } catch (err) {
+        console.error("Row failed:", index, err);
+        markRowAsInvalid(
+          index + 2,
+          err instanceof Error ? err.message : "Unexpected import error"
+        );
+      }
+    }
+
+    if (payloads.length === 0) {
+      setUploadStage("Import complete");
+      setUploadProgressImmediate(100);
+
+      if (result.duplicates > 0 || result.skipped > 0) {
+        setSuccessMessage(
+          `Import complete: 0 processed, ${result.duplicates} duplicates, ${result.skipped} skipped${result.errors.length > 0 ? `. Errors: ${result.errors.map((error) => `row ${error.row} ${error.reason}`).join("; ")}` : ""}`
+        );
+        return result;
+      }
+
+      throw new Error(
+        `No valid rows found. Check column headers. ${JSON.stringify(result.errors)}`
+      );
+    }
+
+    setUploadStage("Uploading claims");
+    setUploadProgressImmediate(68);
+    animateUploadProgress(92, {
+      intervalMs: 90,
+      maxStep: Math.max(1, Math.min(4, Math.ceil(payloads.length / 40))),
+    });
+    const bulkResult = await submitBulkClaims(payloads);
+    result.processed += bulkResult.processed;
+    result.duplicates += bulkResult.duplicates;
+    result.skipped += bulkResult.skipped;
+    result.errors.push(...bulkResult.errors);
+
+    const savedRows = new Set(bulkResult.processedRows);
+    payloads
+      .filter((payload) => savedRows.has(payload.importRow + 1))
+      .forEach((payload) => {
+        writeAuditLog({
+          actor,
+          actorRole,
+          action: "CLAIM_RECORDED",
+          target: payload.target,
+          outcome: "RECORDED",
+          context: "Claim recorded via bulk import",
+          details: {
+            insurer: payload.insurer,
+            deviceName: payload.deviceName,
+            serial: payload.serial,
+            reason: payload.reason,
+            outcome: payload.outcome ?? "pending",
+            importRow: payload.importRow,
+          },
+        });
+      });
+
+    setUploadStage("Refreshing data");
+    setUploadProgressImmediate(94);
+    animateUploadProgress(99, {
+      intervalMs: 120,
+      maxStep: 1,
+    });
+    await refreshClaims().catch(() => undefined);
+    setUploadStage("Import complete");
+    setUploadProgressImmediate(100);
+
+    setSuccessMessage(
+      `Import complete: ${result.processed} processed, ${result.duplicates} duplicates, ${result.skipped} skipped${result.errors.length > 0 ? `. Errors: ${result.errors.map((error) => `row ${error.row} ${error.reason}`).join("; ")}` : ""}`
+    );
+
+    return result;
+  }
+
+  function handleExcelUpload() {
+    const file = fileInputRef.current?.files?.[0];
+    const xlsx = getXLSX();
+
+    setError("");
+    setSuccessMessage("");
+
+    if (!xlsx) {
+      setError("Excel import library is not available.");
+      return;
+    }
+
+    if (!file) {
+      setError("Please upload an Excel file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onprogress = (event) => {
+      if (!event.lengthComputable) {
+        return;
+      }
+      const readProgress = (event.loaded / event.total) * 25;
+      setUploadStage("Reading file");
+      setUploadProgressImmediate(10 + readProgress);
+    };
+    reader.onload = async (event) => {
+      try {
+        const result = event.target?.result;
+        if (!(result instanceof ArrayBuffer)) {
+          throw new Error("Unable to read file.");
+        }
+
+        const workbook = xlsx.read(new Uint8Array(result), { type: "array" });
+        const firstSheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[firstSheetName];
+        const rows = xlsx.utils.sheet_to_json(sheet, {
+          defval: "",
+          raw: false,
+        });
+
+        console.log("Headers:", Object.keys(rows[0] ?? {}));
+        console.log("First row:", rows[0] ?? null);
+
+        if (!rows.length) {
+          setError("The uploaded file does not contain any claim rows.");
+          return;
+        }
+
+        setIsSubmitting(true);
+        setUploadStage("Preparing import");
+        setUploadProgressImmediate(32);
+        await processImportedClaims(rows);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Unable to import claims."
+        );
+        clearUploadProgressTimer();
+        setUploadStage("");
+        setUploadProgress(0);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+
+  function handleSelectedImportFile(file: File | null) {
+    if (!file) {
+      setImportFileName("Upload Excel file");
+      clearUploadProgressTimer();
+      setUploadProgress(0);
+      setUploadStage("");
+      return;
+    }
+
+    if (fileInputRef.current) {
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(file);
+      fileInputRef.current.files = dataTransfer.files;
+    }
+
+    setImportFileName(file.name);
+    setError("");
+    setSuccessMessage("");
+    clearUploadProgressTimer();
+    setUploadProgress(0);
+    setUploadStage("");
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Claim Device / New Claim
-        </h2>
-        <p className="mt-1 text-sm text-muted">
-          Register a claim by serial number. New devices are registered
-          automatically if not found.
-        </p>
-      </div>
-
-      {!isAnalyst && (
-        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-amber-800">
-          You do not have permission to submit new claims.
-        </div>
-      )}
-
-      <div className="bg-white border border-border rounded-xl p-6 shadow-sm space-y-4">
-        <div className="space-y-2">
-          <div className="text-sm font-semibold text-gray-900">
-            Device Identification
+    <div>
+      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Claim Intake
           </div>
+          <h1 className="mt-3 text-2xl font-semibold text-slate-900">
+            Log a new claim
+          </h1>
+        </div>
+
+        {error && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {error}
+          </div>
+        )}
+
+        {successMessage && (
+          <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            {successMessage}
+          </div>
+        )}
+
+        <div
+          className={`mt-6 rounded-xl border border-dashed p-5 transition ${
+            isDraggingFile
+              ? "border-blue-300 bg-blue-50"
+              : "border-slate-300 bg-slate-50"
+          }`}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setIsDraggingFile(true);
+          }}
+          onDragEnter={(event) => {
+            event.preventDefault();
+            setIsDraggingFile(true);
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault();
+            if (event.currentTarget.contains(event.relatedTarget as Node)) {
+              return;
+            }
+            setIsDraggingFile(false);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setIsDraggingFile(false);
+            handleSelectedImportFile(event.dataTransfer.files?.[0] ?? null);
+          }}
+        >
+          <div className="text-sm font-semibold text-slate-900">
+            Bulk Import Claims
+          </div>
+          <p className="mt-2 text-sm text-slate-500">
+            Drag and drop an Excel or CSV file here, or choose a file manually.
+          </p>
+
+          {(uploadProgress > 0 || uploadStage) && (
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                <span>{uploadStage || "Uploading"}</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+                <div
+                  className="h-full rounded-full bg-slate-900 transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
+            <input
+              ref={fileInputRef}
+              type="file"
+              id="excelUpload"
+              accept=".xlsx,.csv"
+              className="hidden"
+              onChange={(event) => {
+                handleSelectedImportFile(event.target.files?.[0] ?? null);
+              }}
+            />
+
+            <label
+              htmlFor="excelUpload"
+              className={`inline-flex cursor-pointer items-center rounded-xl border px-4 py-3 text-sm font-medium transition ${
+                importFileName === "Upload Excel file"
+                  ? "border-border bg-white text-slate-700 hover:border-slate-300"
+                  : "border-blue-200 bg-blue-50 text-blue-700"
+              }`}
+            >
+              {importFileName === "Upload Excel file"
+                ? "Upload Excel file"
+                : importFileName}
+            </label>
+
+            <button
+              type="button"
+              onClick={handleExcelUpload}
+              disabled={isSubmitting}
+              className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300"
+            >
+              {isSubmitting ? "Importing..." : "Import Claims"}
+            </button>
+
+          </div>
+
+          <p className="mt-3 text-xs text-slate-500">
+            Upload multiple claims at once. Include at least one device identifier
+            column per row: IMEI or Serial, plus Brand, Model, ClaimType, Amount,
+            and DateOfLoss.
+          </p>
+        </div>
+
+        <p className="my-4 text-center text-xs tracking-[0.22em] text-slate-400">
+          OR MANUALLY CAPTURE
+        </p>
+
+        <form
+          id="claimForm"
+          className="mt-2 grid gap-5 lg:grid-cols-2"
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleSubmit();
+          }}
+        >
           <div className="space-y-2">
-            <label className="text-xs text-muted">
-              Serial Number *
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Device Name / Model
             </label>
             <input
-              value={serial}
-              onChange={(e) => {
-                setSerial(e.target.value);
-                setResult(null);
-              }}
-              onBlur={(e) => handleLookup(e.target.value)}
-              placeholder="Example: SN-B2002"
-              className="w-full border border-border px-3 py-2 rounded text-sm"
+              value={deviceName}
+              onChange={(event) => setDeviceName(event.target.value)}
+              placeholder="Apple iPhone 13 Pro"
+              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
             />
           </div>
+
           <div className="space-y-2">
-            <label className="text-xs text-muted">IMEI</label>
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              IMEI Number
+            </label>
             <input
-              value={imei}
-              onChange={(e) => setImei(e.target.value)}
-              placeholder="Example: 356222222222222"
-              className="w-full border border-border px-3 py-2 rounded text-sm"
+              value={imeiNumber}
+              onChange={(event) => setImeiNumber(event.target.value)}
+              placeholder="Enter IMEI if available"
+              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            />
+            <div className="text-xs text-slate-500">
+              Enter IMEI or provide a serial number instead.
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Serial Number
+            </label>
+            <input
+              value={serialNumber}
+              onChange={(event) => setSerialNumber(event.target.value)}
+              placeholder="Enter serial if IMEI is unavailable"
+              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            />
+            <div className="text-xs text-slate-500">
+              At least one of IMEI or serial number is required.
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Claim Outcome
+            </label>
+            <select
+              value={claimOutcome}
+              onChange={(event) => setClaimOutcome(event.target.value)}
+              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            >
+              <option value="">Select outcome</option>
+              {outcomeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Date Of Loss
+            </label>
+            <input
+              type="date"
+              value={dateOfLoss}
+              onChange={(event) => setDateOfLoss(event.target.value)}
+              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
             />
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <div className="text-sm font-semibold text-gray-900">
-            Device Details
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs text-muted">
-                Device Category *
-              </label>
-              <select
-                value={deviceCategory}
-                onChange={(e) =>
-                  setDeviceCategory(
-                    e.target.value as "Mobile" | "Laptop" | "Tablet"
-                  )
-                }
-                className="w-full border border-border px-3 py-2 rounded text-sm bg-white"
-                disabled={categoryLocked}
-              >
-                <option value="Mobile">Mobile</option>
-                <option value="Laptop">Laptop</option>
-                <option value="Tablet">Tablet</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">Device Brand *</label>
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Claim Amount
+            </label>
+            <div className="flex items-center rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-200">
+              <span className="mr-3 font-semibold text-slate-500">R</span>
               <input
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                placeholder="Example: Samsung"
-                className="w-full border border-border px-3 py-2 rounded text-sm"
-                disabled={brandLocked}
+                type="text"
+                inputMode="decimal"
+                value={paidOutValue}
+                onChange={(event) =>
+                  handlePaidOutValueChange(event.target.value)
+                }
+                placeholder="0.00"
+                className="w-full bg-transparent text-sm text-slate-900 outline-none"
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">Device Model *</label>
-              <input
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder="Example: Galaxy S22"
-                className="w-full border border-border px-3 py-2 rounded text-sm"
-                disabled={modelLocked}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">
-                Device Age *
-              </label>
-              <select
-                value={deviceAge}
-                onChange={(e) =>
-                  setDeviceAge(
-                    e.target.value as
-                      | "< 6 months"
-                      | "6–12 months"
-                      | "> 12 months"
-                  )
-                }
-                className="w-full border border-border px-3 py-2 rounded text-sm bg-white"
-                disabled={ageLocked}
-              >
-                <option value="< 6 months">&lt; 6 months</option>
-                <option value="6–12 months">6–12 months</option>
-                <option value="> 12 months">&gt; 12 months</option>
-              </select>
+            <div className="text-xs text-slate-500">
+              Enter amount in South African Rand (ZAR).
             </div>
           </div>
-          {isExisting && (
-            <p className="text-xs text-muted">
-              Existing device detected. Details are locked.
-            </p>
-          )}
-        </div>
 
-        <div className="space-y-2">
-          <div className="text-sm font-semibold text-gray-900">
-            Claim Details
+          <div className="space-y-2 lg:col-span-2">
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Reason
+            </label>
+            <textarea
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              rows={4}
+              className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-xs text-muted">Insurer *</label>
-              <select
-                value={insurer}
-                onChange={(e) =>
-                  setInsurer(
-                    e.target.value as
-                      | "Alpha Insurance"
-                      | "Beta Assurance"
-                      | "Gamma Cover"
-                  )
-                }
-                className="w-full border border-border px-3 py-2 rounded text-sm bg-white"
-              >
-                <option value="Alpha Insurance">Alpha Insurance</option>
-                <option value="Beta Assurance">Beta Assurance</option>
-                <option value="Gamma Cover">Gamma Cover</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">
-                Claim Reference *
-              </label>
-              <input
-                value={claimReference}
-                onChange={(e) => setClaimReference(e.target.value)}
-                placeholder="Example: BETA-CLM-2025-00421"
-                className="w-full border border-border px-3 py-2 rounded text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">Loss Type *</label>
-              <select
-                value={lossType}
-                onChange={(e) =>
-                  setLossType(
-                    e.target.value as
-                      | "Theft"
-                      | "Accidental Damage"
-                      | "Loss"
-                      | "Fire"
-                      | "Water Damage"
-                  )
-                }
-                className="w-full border border-border px-3 py-2 rounded text-sm bg-white"
-              >
-                <option value="Theft">Theft</option>
-                <option value="Accidental Damage">Accidental Damage</option>
-                <option value="Loss">Loss</option>
-                <option value="Fire">Fire</option>
-                <option value="Water Damage">Water Damage</option>
-              </select>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">
-                Date of Loss *
-              </label>
-              <input
-                type="date"
-                value={dateOfLoss}
-                onChange={(e) => setDateOfLoss(e.target.value)}
-                className="w-full border border-border px-3 py-2 rounded text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">
-                Claim Amount
-              </label>
-              <input
-                type="number"
-                value={claimAmount}
-                onChange={(e) => setClaimAmount(e.target.value)}
-                placeholder="Example: 15000"
-                className="w-full border border-border px-3 py-2 rounded text-sm"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted">
-                Claim Outcome *
-              </label>
-              <select
-                value={outcome}
-                onChange={(e) =>
-                  setOutcome(
-                    e.target.value as
-                      | "PAID_TOTAL_LOSS"
-                      | "PAID_PARTIAL"
-                      | "REJECTED"
-                  )
-                }
-                className="w-full border border-border px-3 py-2 rounded text-sm bg-white"
-              >
-                <option value="PAID_TOTAL_LOSS">
-                  PAID_TOTAL_LOSS
-                </option>
-                <option value="PAID_PARTIAL">PAID_PARTIAL</option>
-                <option value="REJECTED">REJECTED</option>
-              </select>
-            </div>
-          </div>
-        </div>
+        </form>
 
-        <div className="space-y-2">
-          <div className="text-sm font-semibold text-gray-900">
-            Device History & Risk Feedback
-          </div>
-          <div className="border border-border rounded-lg p-4 text-sm text-gray-700 space-y-2 bg-gray-50">
-            {!lookup && (
-              <div className="text-muted">
-                Enter a serial number to view device history.
-              </div>
-            )}
-            {lookup && !lookup.exists && (
-              <>
-                <div>No prior claims found for this device.</div>
-                <div className="text-xs text-muted">
-                  Risk status:{" "}
-                  <span className="font-semibold text-green-700">
-                    Clean
-                  </span>
-                </div>
-              </>
-            )}
-            {lookup && lookup.exists && (
-              <>
-                <div className="text-amber-800">
-                  Existing device detected.
-                </div>
-                <div>
-                  Prior claims:{" "}
-                  <span className="font-semibold">
-                    {historySummary?.claimCount ?? 0}
-                  </span>
-                </div>
-                <div>
-                  Insurers involved:{" "}
-                  <span className="font-semibold">
-                    {historySummary?.insurers.length
-                      ? historySummary.insurers.join(", ")
-                      : "Unknown"}
-                  </span>
-                </div>
-                <div>
-                  Claim outcomes:{" "}
-                  <span className="font-semibold">
-                    {historySummary?.outcomes.length
-                      ? historySummary.outcomes.join(", ")
-                      : "Unknown"}
-                  </span>
-                </div>
-                <div className="text-xs text-muted">
-                  Risk status:{" "}
-                  <span className="font-semibold text-red-700">
-                    Duplicate
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {error && <div className="text-sm text-danger">{error}</div>}
-
-        {result && result.status === "created" && (
-          <div className="text-sm text-green-700 bg-green-50 border border-green-100 rounded-md px-3 py-2">
-            New device created. Claim submitted.
-          </div>
-        )}
-
-        {result && result.status === "existing" && (
-          <div className="text-sm text-amber-800 bg-amber-50 border border-amber-100 rounded-md px-3 py-2">
-            Existing device detected. Claim submitted.
-          </div>
-        )}
-
-        <div className="flex justify-end gap-3">
+        <div className="mt-6 flex justify-end">
           <button
-            type="button"
-            onClick={() => {
-              setSerial("");
-              setImei("");
-              setDeviceCategory("Mobile");
-              setBrand("");
-              setModel("");
-              setDeviceAge("< 6 months");
-              setInsurer("Alpha Insurance");
-              setClaimReference("");
-              setLossType("Theft");
-              setDateOfLoss("");
-              setClaimAmount("");
-              setLookup(null);
-              setResult(null);
-              setError("");
-            }}
-            className="px-4 py-2 rounded text-sm text-muted hover:text-gray-900"
+            type="submit"
+            form="claimForm"
+            disabled={isSubmitting}
+            className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 disabled:opacity-50"
           >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (!isAnalyst) {
-                const actor = user?.id ?? "system";
-                const actorRole = user?.role ?? "unknown";
-                writeAuditLog({
-                  actor,
-                  actorRole,
-                  action: "PERMISSION_DENIED",
-                  target: "claim-device/new",
-                  outcome: "FAILURE",
-                  context: "New claim submission blocked",
-                });
-                return;
-              }
-              setError("");
-              const nextSerial = serial.trim();
-              if (!nextSerial) {
-                setError("Serial number is required.");
-                return;
-              }
-
-              try {
-                const actor = user?.id ?? "system";
-                const actorRole = user?.role ?? "unknown";
-
-                const nextLookup = computeLookup(nextSerial);
-                setLookup(nextLookup);
-                const isDeviceExisting = nextLookup.exists;
-                const needsDeviceDetails = !isDeviceExisting;
-
-              if (
-                needsDeviceDetails &&
-                (!deviceCategory || !brand.trim() || !model.trim() || !deviceAge)
-              ) {
-                setError(
-                  "Device category, brand, model, and age are required for new devices."
-                );
-                return;
-              }
-
-              if (
-                !insurer ||
-                !claimReference.trim() ||
-                !lossType ||
-                !dateOfLoss ||
-                !outcome
-              ) {
-                setError("Please complete all required claim fields.");
-                return;
-              }
-
-              let device: RegisteredDevice;
-              let status: "created" | "existing" = "existing";
-
-                if (isDeviceExisting) {
-                  const fallbackDeviceId =
-                    getDeviceIdBySerial(nextSerial) ??
-                    nextLookup.device?.id ??
-                    `device-${nextSerial}`;
-                  device =
-                    nextLookup.device ?? {
-                      id: fallbackDeviceId,
-                      serial: nextSerial,
-                      imei: imei.trim() || undefined,
-                      category: deviceCategory,
-                      brand: brand.trim() || undefined,
-                      model: model.trim() || undefined,
-                      age: deviceAge,
-                      status: "Existing",
-                      registeredAtUtc: new Date().toISOString(),
-                    };
-                } else {
-                  device = createDeviceRecord({
-                    serial: nextSerial,
-                    imei: imei.trim() || undefined,
-                    category: deviceCategory,
-                    brand: brand.trim(),
-                    model: model.trim(),
-                    age: deviceAge,
-                  });
-                  status = "created";
-                  writeAuditLog({
-                    actor,
-                    actorRole,
-                    action: "DEVICE_CREATED",
-                    target: device.serial,
-                    outcome: "SUCCESS",
-                    context: "Device created from claim intake",
-                  });
-                }
-
-                createClaimEvent({
-                  deviceId: device.id,
-                  serial: device.serial,
-                  imei: imei.trim() || device.imei,
-                  deviceCategory: deviceCategory,
-                  brand: device.brand,
-                  model: device.model,
-                  deviceAge,
-                  insurer,
-                  claimReference: claimReference.trim(),
-                  lossType,
-                  dateOfLoss,
-                  claimAmount: claimAmount ? Number(claimAmount) : undefined,
-                  outcome,
-                });
-                recordClaimForDevice({
-                  serial: device.serial,
-                  imei: imei.trim() || device.imei,
-                  insurer,
-                });
-
-                writeAuditLog({
-                  actor,
-                  actorRole,
-                  action: "CLAIM_SUBMITTED",
-                  target: device.serial,
-                  outcome: "SUCCESS",
-                  context: `Claim submitted (${outcome})`,
-                });
-
-                if (isDeviceExisting) {
-                  writeAuditLog({
-                    actor,
-                    actorRole,
-                    action: "DUPLICATE_DEVICE_DETECTED",
-                    target: device.serial,
-                    outcome: "SUCCESS",
-                    context: "Existing device detected during claim intake",
-                  });
-                }
-
-                setResult({ status, device });
-                handleLookup(nextSerial);
-              } catch (err) {
-                setError(
-                  err instanceof Error
-                    ? err.message
-                    : "Unable to submit claim."
-                );
-              }
-            }}
-            disabled={!canSubmit || !isAnalyst}
-            className="px-4 py-2 rounded text-sm font-semibold border border-border bg-white text-gray-900 hover:border-primary hover:text-primary transition disabled:opacity-50"
-          >
-            Submit Claim
+            {isSubmitting ? "Submitting..." : "Log Claim"}
           </button>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

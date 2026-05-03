@@ -1,9 +1,8 @@
 type Props = {
-  view: "audit" | "case" | "monthly";
-  onExportAudit?: () => void;
+  view: "case" | "monthly";
 };
 
-export default function ReportsPage({ view, onExportAudit }: Props) {
+export default function ReportsPage({ view }: Props) {
   return (
     <div className="space-y-4">
       <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
@@ -21,24 +20,6 @@ export default function ReportsPage({ view, onExportAudit }: Props) {
           </span>
         </div>
       </div>
-
-      {view === "audit" && (
-        <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Audit Log Export
-          </h3>
-          <p className="mt-2 text-sm text-muted">
-            Export immutable audit events for compliance review.
-          </p>
-          <button
-            type="button"
-            onClick={onExportAudit}
-            className="mt-4 px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:brightness-95 transition"
-          >
-            Export audit log
-          </button>
-        </div>
-      )}
 
       {view === "case" && (
         <div className="bg-white border border-border rounded-xl p-6 shadow-sm">

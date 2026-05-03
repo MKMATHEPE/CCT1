@@ -1,15 +1,19 @@
+import type { StoredSession } from "./sessionUser";
 import { createContext } from "react";
 
 export type User = {
   id: string;
   name: string;
-  role: "analyst" | "manager" | "admin";
+  role: "admin" | "client";
+  insurerId: string;
+  insurerName: string;
 };
 
 export type AuthContextValue = {
   user: User | null;
-  login: (user: User) => void;
-  logout: () => void;
+  isLoading: boolean;
+  login: (session: StoredSession) => void;
+  logout: () => Promise<void>;
 };
 
 export const AuthContext =

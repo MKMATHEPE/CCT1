@@ -1,0 +1,39 @@
+{
+  "claims": [
+    {
+      "id": "ca72cfe4-3935-4001-9978-b5727d9ddd22",
+      "imei": "98765w24534758760",
+      "claimAmount": 3444,
+      "status": "APPROVED",
+      "createdAt": "2026-04-09T20:28:13.240Z",
+      "insurerId": "beta-assurance",
+      "userId": "user-erin-parker"
+    }
+  ],
+  "searches": [
+    {
+      "id": "74ad7b66-991e-4eea-9a78-6e3b76c2322f",
+      "imei": "98765w24534758765",
+      "searchedAt": "2026-04-09T20:25:51.001Z",
+      "resultFound": true,
+      "insurerId": "beta-assurance",
+      "userId": "user-erin-parker"
+    },
+    {
+      "id": "ab75790d-a989-4737-966a-7dc0d024d564",
+      "imei": "98765w24534758760",
+      "searchedAt": "2026-04-09T20:26:59.962Z",
+      "resultFound": false,
+      "insurerId": "beta-assurance",
+      "userId": "user-erin-parker"
+    },
+    {
+      "id": "ac317f82-a2c9-4594-b578-bc64f01c1805",
+      "imei": "98765w24534758760",
+      "searchedAt": "2026-04-09T20:31:02.446Z",
+      "resultFound": true,
+      "insurerId": "beta-assurance",
+      "userId": "user-erin-parker"
+    }
+  ]
+}

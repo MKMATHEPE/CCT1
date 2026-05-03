@@ -1,75 +1,84 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../auth/useAuth";
+import { useState } from "react";
 
 type Props = {
-  onLogin?: (role: "analyst" | "manager") => void;
+  onLogin: (username: string, password: string) => Promise<boolean>;
 };
 
 export default function LoggedOutPage({ onLogin }: Props) {
-  const [role, setRole] = useState<"analyst" | "manager">(() => {
-    return (
-      (sessionStorage.getItem("cct:demo-role") as "analyst" | "manager") ??
-      "analyst"
-    );
-  });
-  const { login } = useAuth();
-  const navigate = useNavigate();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    sessionStorage.setItem("cct:demo-role", role);
-  }, [role]);
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
-  function handleLogin() {
-    if (onLogin) {
-      onLogin(role);
-      return;
+    try {
+      const success = await onLogin(username, password);
+      if (!success) {
+        setError("Invalid username or password.");
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Unable to sign in.");
+    } finally {
+      setIsSubmitting(false);
     }
-    login({
-      id: `demo-${role}`,
-      name: role === "manager" ? "Erin Parker" : "Sasha Harper",
-      role,
-    });
-    navigate("/");
+
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg p-6">
-      <div className="w-full max-w-md bg-white border border-border rounded-3xl shadow-xl p-8 space-y-6">
-        <div>
-          <div className="text-xs uppercase tracking-wide text-muted">
-            Claims Centre of Truth
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.24),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(239,68,68,0.16),_transparent_24%),linear-gradient(180deg,#020617_0%,#0f172a_100%)] flex items-center justify-center px-6 py-12 text-white">
+      <section className="w-full max-w-md rounded-[32px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.92)_0%,rgba(2,6,23,0.96)_100%)] p-8 shadow-[0_28px_80px_rgba(2,6,23,0.55)] backdrop-blur">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold text-white">Sign In</h2>
+            <p className="text-sm text-slate-400">
+              Enter your username and password to continue.
+            </p>
           </div>
-          <h1 className="mt-2 text-2xl font-semibold text-gray-900">
-            Secure access to device claim intelligence
-          </h1>
-        </div>
-        <p className="text-sm text-gray-600">
-          Your session has ended. Please log in to continue working in the Claims Centre of Truth.
-        </p>
-        <div className="space-y-3">
-          <label className="text-xs font-semibold text-gray-500 tracking-wide">
-            Sign in as
-          </label>
-          <div className="relative">
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value as "analyst" | "manager")}
-              className="w-full rounded-md border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Username
+              </label>
+              <input
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+                placeholder="Enter username"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-4 focus:ring-sky-400/15"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter password"
+                className="w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400 focus:ring-4 focus:ring-sky-400/15"
+              />
+            </div>
+
+            {error && (
+              <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-2xl bg-[linear-gradient(135deg,#f97316_0%,#ef4444_100%)] px-4 py-3 text-sm font-semibold text-white shadow-[0_18px_48px_rgba(239,68,68,0.35)] transition hover:-translate-y-0.5 hover:brightness-110"
             >
-              <option value="analyst">Fraud Analyst</option>
-              <option value="manager">Manager</option>
-            </select>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={handleLogin}
-          className="w-full px-4 py-3 rounded-xl text-black text-sm font-semibold border border-black shadow-lg hover:scale-[1.02] hover:shadow-xl transition-all duration-200 mt-4"
-        >
-          Log in
-        </button>
-      </div>
+              {isSubmitting ? "Signing In..." : "Sign In"}
+            </button>
+          </form>
+      </section>
     </div>
   );
 }

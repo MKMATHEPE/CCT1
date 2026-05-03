@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  getClaims,
-  getClaimsByIMEI,
-} from "../services/deviceDataService";
+import { useClaims } from "../services/deviceDataService";
 import type { Claim } from "../services/deviceDataService";
 import {
   addCaseNote,
@@ -38,7 +35,20 @@ export default function ClaimDrawer({
   allowReassign = true,
   onOpenCase,
 }: Props) {
-  const claims: Claim[] = imei ? getClaimsByIMEI(imei) : [];
+  const allClaims = useClaims();
+  const claims: Claim[] = useMemo(
+    () =>
+      imei
+        ? allClaims
+            .filter((claim) => claim.imei === imei)
+            .sort(
+              (a, b) =>
+                new Date(b.timestamp).getTime() -
+                new Date(a.timestamp).getTime()
+            )
+        : [],
+    [allClaims, imei]
+  );
   const { user } = useAuth();
   const [noteText, setNoteText] = useState("");
   const [timelineOpen, setTimelineOpen] = useState(true);
@@ -51,7 +61,6 @@ export default function ClaimDrawer({
   const caseRecord = useMemo(() => (imei ? getCase(imei) : null), [imei]);
 
   const investigators = useMemo(() => getInvestigators(), []);
-  const allClaims = useMemo(() => getClaims(), []);
   const claimOptions = useMemo(
     () =>
       allClaims.map((claim) => ({
@@ -612,7 +621,7 @@ export default function ClaimDrawer({
                 Case Actions
               </h3>
               <div className="mt-3 space-y-3">
-                {(user?.role === "manager" || user?.role === "admin") && (
+                {user?.role === "admin" && (
                   <button
                     type="button"
                     onClick={() => {
@@ -635,8 +644,7 @@ export default function ClaimDrawer({
                 )}
 
                 {allowReassign &&
-                  (user?.role === "manager" ||
-                    user?.role === "admin") && (
+                  user?.role === "admin" && (
                     <div className="flex flex-col gap-2">
                       <label className="text-xs text-muted">
                         Reassign case
@@ -687,7 +695,7 @@ export default function ClaimDrawer({
 
                 {allowReopen &&
                   caseRecord.status === "closed" &&
-                  (user?.role === "manager" || user?.role === "admin") && (
+                  user?.role === "admin" && (
                     <button
                       type="button"
                       onClick={() => {

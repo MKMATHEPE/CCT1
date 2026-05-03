@@ -1,0 +1,375 @@
+{
+  "devices": [
+    {
+      "id": "bbc6ac07-88cf-40b5-a667-713cd61a56ff",
+      "imeiSerial": "356789012345678",
+      "deviceName": "Samsung Galaxy S23",
+      "brand": "Samsung",
+      "deviceType": "mobile",
+      "lastFetchedAt": "2026-03-24T21:55:14.595Z",
+      "createdAt": "2026-03-24T21:55:14.596Z",
+      "updatedAt": "2026-03-24T21:55:14.596Z"
+    },
+    {
+      "id": "17875fc1-0a0e-4b2f-9314-17c9a7ec9b89",
+      "imeiSerial": "354892000001234",
+      "serialNumber": "354892000001234",
+      "deviceName": "Samsung Galaxy S22",
+      "brand": "Samsung",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-24T22:53:51.915Z",
+      "createdAt": "2026-03-24T22:53:51.906Z",
+      "updatedAt": "2026-03-24T22:53:51.915Z"
+    },
+    {
+      "id": "e77ea7e7-0e38-4128-a505-4ccfd83543aa",
+      "imeiSerial": "867530900000111",
+      "serialNumber": "867530900000111",
+      "deviceName": "Apple iPhone 13",
+      "brand": "Apple",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-24T22:53:51.920Z",
+      "createdAt": "2026-03-24T22:53:51.920Z",
+      "updatedAt": "2026-03-24T22:53:51.920Z"
+    },
+    {
+      "id": "2ebac21d-c98b-423d-ae6e-af7106410647",
+      "imeiSerial": "990011223344556",
+      "serialNumber": "990011223344556",
+      "deviceName": "iPad Pro 11",
+      "brand": "iPad",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-24T22:53:51.925Z",
+      "createdAt": "2026-03-24T22:53:51.925Z",
+      "updatedAt": "2026-03-24T22:53:51.925Z"
+    },
+    {
+      "id": "9e86d3bd-da37-4719-b5b9-210785183aa1",
+      "imeiSerial": "112233445566778",
+      "serialNumber": "112233445566778",
+      "deviceName": "Dell XPS 13",
+      "brand": "Dell",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-24T22:53:51.930Z",
+      "createdAt": "2026-03-24T22:53:51.930Z",
+      "updatedAt": "2026-03-24T22:53:51.930Z"
+    },
+    {
+      "id": "8fa8cb40-7de1-443d-9167-b59ad5e7fbad",
+      "imeiSerial": "12342432",
+      "serialNumber": null,
+      "deviceName": "macbook air 14",
+      "brand": "macbook",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-26T19:27:39.331Z",
+      "createdAt": "2026-03-26T19:27:39.331Z",
+      "updatedAt": "2026-03-26T19:27:39.331Z"
+    },
+    {
+      "id": "99de1e2a-278a-4f1b-bdc4-b4d61fb383be",
+      "imeiSerial": "34235465789",
+      "serialNumber": "09876564334",
+      "deviceName": "Conon Xds",
+      "brand": "Conon",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-26T19:28:59.363Z",
+      "createdAt": "2026-03-26T19:28:59.363Z",
+      "updatedAt": "2026-03-26T19:28:59.363Z"
+    },
+    {
+      "id": "1d158142-317e-4886-be5b-38f08cc18e45",
+      "imeiSerial": "3245678543467",
+      "serialNumber": "8765446576879809",
+      "deviceName": "Canon 23",
+      "brand": "Canon",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-26T19:45:18.647Z",
+      "createdAt": "2026-03-26T19:45:18.647Z",
+      "updatedAt": "2026-03-26T19:45:18.647Z"
+    },
+    {
+      "id": "0dbd5266-76d9-400e-ae36-fa7e732cbe85",
+      "imeiSerial": "223344556677889",
+      "serialNumber": null,
+      "deviceName": "Apple Watch Series 8",
+      "brand": "Apple",
+      "deviceType": null,
+      "lastFetchedAt": "2026-03-26T19:46:45.060Z",
+      "createdAt": "2026-03-26T19:46:45.060Z",
+      "updatedAt": "2026-03-26T19:46:45.060Z"
+    }
+  ],
+  "claims": [
+    {
+      "id": "30ce2c7b-f06a-4663-8c61-7a450d01ba87",
+      "deviceId": "bbc6ac07-88cf-40b5-a667-713cd61a56ff",
+      "externalId": "ALPHA-345678-1",
+      "dateOfLoss": "2026-02-11T00:00:00.000Z",
+      "claimAmount": 12500,
+      "outcome": "APPROVED",
+      "reason": "Screen and frame damaged after a vehicle break-in.",
+      "insurer": "Alpha Insurance",
+      "source": "alpha-api",
+      "createdAt": "2026-03-24T21:55:14.597Z"
+    },
+    {
+      "id": "ba84bb43-bff6-40a0-a9aa-5a87ceca3112",
+      "deviceId": "bbc6ac07-88cf-40b5-a667-713cd61a56ff",
+      "externalId": "BETA-345678-7",
+      "dateOfLoss": "2026-03-01T10:00:00.000Z",
+      "claimAmount": 4200,
+      "outcome": "PENDING",
+      "reason": "Water ingress assessment pending final technician report.",
+      "insurer": "Beta Assurance",
+      "source": "beta-api",
+      "createdAt": "2026-03-24T21:55:14.597Z"
+    },
+    {
+      "id": "874cad08-ab64-4cb6-9755-c60884595b17",
+      "deviceId": "17875fc1-0a0e-4b2f-9314-17c9a7ec9b89",
+      "externalId": null,
+      "dateOfLoss": "2025-10-03T00:00:00.000Z",
+      "claimAmount": 13946,
+      "outcome": "APPROVED",
+      "reason": "Screen damage",
+      "insurer": "Alpha Insurance",
+      "source": "manual",
+      "createdAt": "2026-03-24T22:53:51.906Z"
+    },
+    {
+      "id": "fa7085f8-450c-4326-9060-7e9a9a91e0db",
+      "deviceId": "17875fc1-0a0e-4b2f-9314-17c9a7ec9b89",
+      "externalId": null,
+      "dateOfLoss": "2025-11-15T00:00:00.000Z",
+      "claimAmount": 12000,
+      "outcome": "REJECTED",
+      "reason": "Duplicate claim",
+      "insurer": "Beta Assurance",
+      "source": "manual",
+      "createdAt": "2026-03-24T22:53:51.915Z"
+    },
+    {
+      "id": "52d91f88-d698-4f08-9618-6f9531e9fa86",
+      "deviceId": "e77ea7e7-0e38-4128-a505-4ccfd83543aa",
+      "externalId": null,
+      "dateOfLoss": "2025-09-20T00:00:00.000Z",
+      "claimAmount": 18000,
+      "outcome": "APPROVED",
+      "reason": "Theft",
+      "insurer": "Gamma Cover",
+      "source": "manual",
+      "createdAt": "2026-03-24T22:53:51.920Z"
+    },
+    {
+      "id": "32943a9f-6ed2-445b-982e-547535517ffc",
+      "deviceId": "2ebac21d-c98b-423d-ae6e-af7106410647",
+      "externalId": null,
+      "dateOfLoss": "2025-12-01T00:00:00.000Z",
+      "claimAmount": 9500,
+      "outcome": "PENDING",
+      "reason": "Water damage",
+      "insurer": "Alpha Insurance",
+      "source": "manual",
+      "createdAt": "2026-03-24T22:53:51.925Z"
+    },
+    {
+      "id": "93a04f20-6557-4adf-8db5-f7f9fd46b444",
+      "deviceId": "9e86d3bd-da37-4719-b5b9-210785183aa1",
+      "externalId": null,
+      "dateOfLoss": "2025-08-10T00:00:00.000Z",
+      "claimAmount": 22000,
+      "outcome": "APPROVED",
+      "reason": "Accidental damage",
+      "insurer": "Beta Assurance",
+      "source": "manual",
+      "createdAt": "2026-03-24T22:53:51.930Z"
+    },
+    {
+      "id": "be0c5697-af13-4dc4-b142-344d45648e5a",
+      "deviceId": "8fa8cb40-7de1-443d-9167-b59ad5e7fbad",
+      "externalId": null,
+      "dateOfLoss": "2026-03-10T00:00:00.000Z",
+      "claimAmount": 10223,
+      "outcome": "REJECTED",
+      "reason": "stolen in car",
+      "insurer": "Alpha Insurance",
+      "source": "manual",
+      "createdAt": "2026-03-26T19:27:39.332Z"
+    },
+    {
+      "id": "fbba5dc7-17bf-45f7-81fe-0b829b8186f2",
+      "deviceId": "99de1e2a-278a-4f1b-bdc4-b4d61fb383be",
+      "externalId": null,
+      "dateOfLoss": "2026-03-10T00:00:00.000Z",
+      "claimAmount": 56557,
+      "outcome": "PENDING",
+      "reason": "damaged",
+      "insurer": "Gamma Cover",
+      "source": "manual",
+      "createdAt": "2026-03-26T19:28:59.363Z"
+    },
+    {
+      "id": "354a65af-f486-4367-acce-ca0c70e59b73",
+      "deviceId": "1d158142-317e-4886-be5b-38f08cc18e45",
+      "externalId": null,
+      "dateOfLoss": "2026-03-17T00:00:00.000Z",
+      "claimAmount": 34545,
+      "outcome": "APPROVED",
+      "reason": "water damage",
+      "insurer": "Gamma Cover",
+      "source": "manual",
+      "createdAt": "2026-03-26T19:45:18.647Z"
+    },
+    {
+      "id": "203b68ab-1759-4f4f-bd2e-6ebfe0f0dde9",
+      "deviceId": "0dbd5266-76d9-400e-ae36-fa7e732cbe85",
+      "externalId": null,
+      "dateOfLoss": "2025-11-05T00:00:00.000Z",
+      "claimAmount": 7000,
+      "outcome": "REJECTED",
+      "reason": "Duplicate claim",
+      "insurer": "Gamma Cover",
+      "source": "manual",
+      "createdAt": "2026-03-26T19:46:45.061Z"
+    }
+  ],
+  "dashboardClaims": [
+    {
+      "id": "b9eb4c0a-7910-4b16-a355-82ee3a840a15",
+      "imei": "34425678908756432",
+      "claimAmount": 7658,
+      "status": "APPROVED",
+      "createdAt": "2026-04-09T11:02:50.361Z",
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "8573e918-174e-46b7-8235-675b18ea9bbb",
+      "imei": "98765w24534758765",
+      "claimAmount": 7897,
+      "status": "REJECTED",
+      "createdAt": "2026-04-09T12:19:52.981Z",
+      "insurerId": "alpha-insurance"
+    }
+  ],
+  "dashboardSearches": [
+    {
+      "id": "935103ae-653a-4363-ad4e-297d923d39c7",
+      "imei": "112233445566778",
+      "searchedAt": "2026-04-09T09:52:49.494Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "3d69a0d0-fda2-4116-ab2c-6174f8926fc8",
+      "imei": "112233445566778",
+      "searchedAt": "2026-04-09T09:52:59.867Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "8ff95855-f665-40a7-a392-c6f56bb85fc1",
+      "imei": "819856027501842",
+      "searchedAt": "2026-04-09T09:53:37.517Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "b8b6ceaa-5f4e-4a7d-b5d6-6b84eb448405",
+      "imei": "819856027501842",
+      "searchedAt": "2026-04-09T09:54:09.185Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "413dd834-fdeb-4519-8a3c-78735020b53e",
+      "imei": "223344556677889",
+      "searchedAt": "2026-04-09T10:04:15.080Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "dd6cc70a-81aa-46e4-acee-57e1a72bbe3e",
+      "imei": "223344556677889",
+      "searchedAt": "2026-04-09T10:04:17.669Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "6f5056a2-9c24-4995-955d-481c6b1a51a5",
+      "imei": "223344556677889",
+      "searchedAt": "2026-04-09T10:04:21.394Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "ad367106-c65d-4cb3-b9f2-617dd66a8663",
+      "imei": "223344556677889",
+      "searchedAt": "2026-04-09T10:04:22.903Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "09815077-0043-407c-bff7-ed070d4d799d",
+      "imei": "223344556677889",
+      "searchedAt": "2026-04-09T10:12:12.285Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "447b1fab-0d5f-4079-b3fa-928647a8db6b",
+      "imei": "223344556677889",
+      "searchedAt": "2026-04-09T10:33:29.207Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "925b8afb-ab9a-40af-bbdf-0e79ed66f9e9",
+      "imei": "867530900000111",
+      "searchedAt": "2026-04-09T10:35:13.186Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "690c176b-0cb2-4d01-8015-72c699d98763",
+      "imei": "324354667",
+      "searchedAt": "2026-04-09T10:49:29.977Z",
+      "resultFound": false,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "746758ca-3658-4f13-ba48-d05f77f5c1f6",
+      "imei": "3243546675tytu",
+      "searchedAt": "2026-04-09T10:49:33.771Z",
+      "resultFound": false,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "2ed00acf-1a39-47ae-b54e-1e659bd4e74b",
+      "imei": "54354657687967",
+      "searchedAt": "2026-04-09T12:26:52.928Z",
+      "resultFound": false,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "b5a08dba-6ff8-4d91-8d5c-08330d85edeb",
+      "imei": "87564354656789808977",
+      "searchedAt": "2026-04-09T12:34:53.820Z",
+      "resultFound": false,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "c7ec37c9-ff1a-4e4a-89d0-15d60c4da709",
+      "imei": "98765w24534758765",
+      "searchedAt": "2026-04-09T12:42:11.515Z",
+      "resultFound": true,
+      "insurerId": "alpha-insurance"
+    },
+    {
+      "id": "3266d6a8-1794-41bf-bf93-93d6fd2b3887",
+      "imei": "98765w245347587888",
+      "searchedAt": "2026-04-09T12:42:19.690Z",
+      "resultFound": false,
+      "insurerId": "alpha-insurance"
+    }
+  ]
+}

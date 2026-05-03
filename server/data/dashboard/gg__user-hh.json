@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "searches": [
+    {
+      "id": "14fa1368-d4af-4566-b8d4-8df5e2147b95",
+      "imei": "3245678543467",
+      "searchedAt": "2026-05-02T22:24:41.712Z",
+      "resultFound": true,
+      "insurerId": "gg",
+      "userId": "user-hh"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import {
   getClaimsGroupedByIMEI,
   getStats,
+  useDeviceData,
 } from "../services/deviceDataService";
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export default function InsightsPage({ view }: Props) {
+  useDeviceData();
   const stats = getStats();
   const grouped = getClaimsGroupedByIMEI();
   const totalDevices = Object.keys(grouped).length;

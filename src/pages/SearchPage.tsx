@@ -1,81 +1,113 @@
-import { useEffect, useMemo, useState } from "react";
-import { getClaims, type Claim } from "../services/deviceDataService";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  recordPreventedClaimEvent,
+  searchDeviceClaims,
+  useDeviceData,
+  type Claim,
+} from "../services/deviceDataService";
 import { useAuth } from "../auth/useAuth";
 import { writeAuditLog } from "../services/auditLogService";
 
-type SearchMode = "imei" | "serial" | "policy" | "claim";
+type SearchMode = "imei" | "serial" | "identifier" | "policy" | "claim";
 
 type Props = {
   mode: SearchMode;
-  onViewCase: (imei: string) => void;
 };
 
 type ResultRow = {
-  id: number;
+  id: string;
   imei: string;
   device: string;
   outcome: Claim["outcome"];
   timestamp: string;
+  insurer: string;
+  amount: number;
+};
+
+type ClaimPrefillState = {
+  prefillIdentifier: string;
+  prefillMode: "imei" | "serial" | "identifier";
 };
 
 const MODE_LABEL: Record<SearchMode, string> = {
   imei: "IMEI",
   serial: "Serial Number",
+  identifier: "IMEI or Serial Number",
   policy: "Policy Number",
   claim: "Claim ID",
 };
 
-export default function SearchPage({ mode, onViewCase }: Props) {
+export default function SearchPage({ mode }: Props) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [submitted, setSubmitted] = useState("");
+  const [results, setResults] = useState<ResultRow[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const { user } = useAuth();
+  const { claims, preventedClaimEvents } = useDeviceData();
 
-  const results = useMemo(() => {
-    const trimmed = submitted.trim();
-    if (!trimmed) return [];
-    if (mode === "policy") return [];
-
-    const claims = getClaims();
-    if (mode === "imei") {
-      return claims
-        .filter((c) => c.imei === trimmed)
-        .map(toResultRow);
+  async function handleSearch() {
+    const trimmed = query.trim();
+    if (!trimmed || mode === "policy") {
+      setSubmitted(trimmed);
+      setResults([]);
+      return;
     }
-    if (mode === "serial") {
-      return claims
-        .filter((c) => c.serial === trimmed)
-        .map(toResultRow);
-    }
-    if (mode === "claim") {
-      const id = Number(trimmed);
-      if (!Number.isFinite(id)) return [];
-      return claims
-        .filter((c) => c.id === id)
-        .map(toResultRow);
-    }
-    return [];
-  }, [mode, submitted]);
-
-  useEffect(() => {
-    const trimmed = submitted.trim();
-    if (!trimmed) return;
 
     const actor = user?.id ?? "system";
     const actorRole = user?.role ?? "unknown";
-    const outcome = results.length > 0 ? "SUCCESS" : "FAILURE";
+    setIsSearching(true);
 
-    writeAuditLog({
-      actor,
-      actorRole,
-      action: "SEARCH",
-      target: trimmed,
-      outcome,
-      context: `Search by ${MODE_LABEL[mode]}`,
-    });
-  }, [submitted, results.length, mode, user]);
+    try {
+      const matchedClaims =
+        mode === "claim"
+          ? getMatchingClaims(mode, trimmed, claims)
+          : mode === "imei" || mode === "serial" || mode === "identifier"
+            ? await searchDeviceClaims(mode, trimmed)
+            : [];
+      const outcome = matchedClaims.length > 0 ? "SUCCESS" : "FAILURE";
+
+      setSubmitted(trimmed);
+      setResults(matchedClaims.map(toResultRow));
+
+      writeAuditLog({
+        actor,
+        actorRole,
+        action: "SEARCH",
+        target: trimmed,
+        outcome,
+        context: `Search by ${MODE_LABEL[mode]}`,
+      });
+
+      if (matchedClaims.length > 0) {
+        recordPreventedClaimEvent({
+          query: trimmed,
+          mode,
+          matchedClaims,
+        });
+      }
+    } finally {
+      setIsSearching(false);
+    }
+  }
 
   const emptyState =
     submitted.trim().length > 0 && results.length === 0;
+
+  function handleLogClaimFromSearch() {
+    if (!submitted.trim()) {
+      return;
+    }
+
+    navigate("/claim-device/new", {
+      state: {
+        prefillIdentifier: submitted.trim(),
+        prefillMode:
+          mode === "serial" ? "serial" : mode === "imei" ? "imei" : "identifier",
+      } satisfies ClaimPrefillState,
+    });
+  }
 
   return (
     <div className="space-y-4">
@@ -105,62 +137,156 @@ export default function SearchPage({ mode, onViewCase }: Props) {
             />
             <button
               type="button"
-              onClick={() => setSubmitted(query)}
-              className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:brightness-95 transition"
+              onClick={handleSearch}
+              disabled={isSearching}
+              className="px-4 py-2 rounded-lg bg-primary text-black text-sm font-semibold shadow-sm transition transform duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 hover:bg-primary/90 focus:outline-none focus:ring-4 focus:ring-primary/30"
             >
-              Search
+              {isSearching ? "Searching..." : "Search"}
             </button>
           </div>
         )}
       </div>
 
-      {results.length > 0 && (
-        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
-              <tr>
-                <th className="px-6 py-3 text-left">Device</th>
-                <th className="px-6 py-3 text-left">IMEI</th>
-                <th className="px-6 py-3 text-left">Outcome</th>
-                <th className="px-6 py-3 text-left">Timestamp</th>
-                <th className="px-6 py-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.map((row) => (
-                <tr
-                  key={`${row.id}-${row.imei}`}
-                  className="border-t border-border"
-                >
-                  <td className="px-6 py-4 font-medium text-gray-900">
-                    {row.device}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{row.imei}</td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {row.outcome.toUpperCase()}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {new Date(row.timestamp).toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => onViewCase(row.imei)}
-                      className="text-primary font-medium hover:underline"
-                    >
-                      View
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {results.length > 0 && submitted.trim() && (
+        <div className="bg-white border border-border rounded-xl p-6 shadow-sm space-y-6">
+          {/* Main Recommendation Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Claim Decision
+              </h3>
+              {(() => {
+                return (
+                  <div className="space-y-3">
+                    <p className="text-sm text-gray-600">
+                      <strong>Decision:</strong> Reject Claim
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Reason:</strong> This device has already been claimed with another insurer.
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-gray-900">
+                {results.length}
+              </div>
+              <div className="text-sm text-gray-500">
+                Total Claims Found
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Statistics */}
+          {(() => {
+            const recommendation = getInsuranceRecommendation(
+              results[0].imei,
+              submitted,
+              claims,
+              preventedClaimEvents
+            );
+            const details = recommendation.details;
+            return (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-200">
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-green-600">{details.approvedClaims}</div>
+                  <div className="text-xs text-gray-500">Approved</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-red-600">{details.rejectedClaims}</div>
+                  <div className="text-xs text-gray-500">Rejected</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-yellow-600">{details.searches}</div>
+                  <div className="text-xs text-gray-500">Searches</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-lg font-semibold text-blue-600">{details.uniqueInsurers}</div>
+                  <div className="text-xs text-gray-500">Insurers</div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Claim History Timeline */}
+          {(() => {
+            const recommendation = getInsuranceRecommendation(
+              results[0].imei,
+              submitted,
+              claims,
+              preventedClaimEvents
+            );
+            const details = recommendation.details;
+            if (details.claimHistory.length === 0) return null;
+
+            return (
+              <div className="pt-4 border-t border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Claim History</h4>
+                <div className="space-y-3">
+                  {details.claimHistory.slice(0, 5).map((claim, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${
+                              claim.outcome === "APPROVED" ? "bg-green-500" :
+                              claim.outcome === "REJECTED" ? "bg-red-500" : "bg-yellow-500"
+                            }`} />
+                            <span className={`text-sm font-semibold ${
+                              claim.outcome === "APPROVED" ? "text-green-700" :
+                              claim.outcome === "REJECTED" ? "text-red-700" : "text-yellow-700"
+                            }`}>
+                              {claim.outcome}
+                            </span>
+                          </div>
+                          <div><strong>Device:</strong> {claim.device}</div>
+                          <div><strong>IMEI:</strong> {claim.imei}</div>
+                          <div><strong>Serial:</strong> {claim.serial}</div>
+                          <div><strong>Insurer:</strong> {claim.insurer}</div>
+                        </div>
+                        <div className="space-y-2">
+                          <div><strong>Claim Date:</strong> {claim.date}</div>
+                          <div><strong>Date of Loss:</strong> {claim.dateOfLoss}</div>
+                          <div><strong>Amount:</strong> {claim.amount.toLocaleString(undefined, { style: "currency", currency: "ZAR" })}</div>
+                          <div><strong>Reason:</strong> {claim.reason}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {details.claimHistory.length > 5 && (
+                    <div className="text-xs text-gray-500 text-center py-2">
+                      And {details.claimHistory.length - 5} more claims...
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+
         </div>
       )}
 
       {emptyState && (
-        <div className="bg-white border border-border rounded-xl p-6 shadow-sm text-sm text-muted">
-          No results found for "{submitted}".
+        <div className="bg-white border border-border rounded-xl p-6 shadow-sm space-y-3">
+          <div className="text-sm font-semibold text-green-700">
+            Device Status: Clear — No results found for “{submitted}”.
+          </div>
+          <div className="text-sm text-gray-600">
+            No prior claims were located for this IMEI or Serial Number.
+          </div>
+          <div className="text-sm text-gray-600">
+            This device has no recorded claims in the CCT registry and is eligible for insurance coverage.
+          </div>
+          <div className="pt-3 flex justify-end">
+            <button
+              type="button"
+              onClick={handleLogClaimFromSearch}
+              className="px-4 py-2 rounded-lg bg-primary text-black text-sm font-semibold shadow-sm transition transform duration-200 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 hover:bg-primary/90"
+            >
+              Log Claim
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -174,5 +300,186 @@ function toResultRow(claim: Claim): ResultRow {
     device: `${claim.brand} ${claim.model}`,
     outcome: claim.outcome,
     timestamp: claim.timestamp,
+    insurer: claim.insurer ?? "Unknown",
+    amount: claim.amount,
+  };
+}
+
+function getMatchingClaims(mode: SearchMode, query: string, claims: Claim[]): Claim[] {
+  const trimmed = query.trim();
+  if (!trimmed || mode === "policy") {
+    return [];
+  }
+  if (mode === "imei") {
+    return claims.filter((claim) => claim.imei === trimmed);
+  }
+  if (mode === "serial") {
+    return claims.filter((claim) => claim.serial === trimmed);
+  }
+  if (mode === "identifier") {
+    return claims.filter(
+      (claim) => claim.imei === trimmed || claim.serial === trimmed
+    );
+  }
+  if (mode === "claim") {
+    return claims.filter((claim) => claim.id === trimmed);
+  }
+  return [];
+}
+
+function getInsuranceRecommendation(
+  imei: string,
+  searchQuery: string,
+  claims: Claim[],
+  preventedClaimEvents: Array<{ query: string }>
+): {
+  recommendation: "ACCEPT" | "REJECT" | "REVIEW"; 
+  reason: string; 
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  details: {
+    totalClaims: number;
+    approvedClaims: number;
+    rejectedClaims: number;
+    pendingClaims: number;
+    searches: number;
+    uniqueInsurers: number;
+    crossInsurer: boolean;
+    recentClaims: number;
+    highValueClaims: number;
+    averageClaimAmount: number;
+    lastClaimDate: string;
+    riskFactors: string[];
+    claimHistory: Array<{
+      id: string;
+      imei: string;
+      serial: string;
+      device: string;
+      date: string;
+      dateOfLoss: string;
+      outcome: string;
+      amount: number;
+      insurer: string;
+      reason: string;
+    }>;
+  };
+} {
+  const allClaims = claims.filter((claim) => claim.imei === imei);
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const searches = preventedClaimEvents.filter(
+    (event) => event.query.trim().toLowerCase() === normalizedSearchQuery
+  ).length;
+  const claimCount = allClaims.length;
+  const approvedClaims = allClaims.filter((c) => c.outcome === "approved").length;
+  const rejectedClaims = allClaims.filter((c) => c.outcome === "rejected").length;
+  const pendingClaims = allClaims.filter((c) => c.outcome === "pending").length;
+  const insurers = [...new Set(allClaims.map((c) => c.insurer ?? "Unknown"))];
+  const uniqueInsurers = insurers.length;
+  const crossInsurer = uniqueInsurers > 1;
+
+  // Recent claims within 30 days
+  const recentClaims = allClaims.filter((c) => {
+    const claimDate = new Date(c.timestamp);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return claimDate > thirtyDaysAgo;
+  }).length;
+
+  // High claim amounts (>R10,000)
+  const highValueClaims = allClaims.filter((c) => c.amount > 10000).length;
+
+  // Average claim amount
+  const averageClaimAmount = claimCount > 0 
+    ? allClaims.reduce((sum, c) => sum + c.amount, 0) / claimCount 
+    : 0;
+
+  // Last claim date
+  const lastClaimDate = claimCount > 0 
+    ? new Date(Math.max(...allClaims.map((c) => new Date(c.timestamp).getTime()))).toLocaleDateString()
+    : "N/A";
+
+  // Calculate risk score
+  let riskScore = 0;
+  const riskFactors: string[] = [];
+
+  // Multiple claims increase risk
+  if (claimCount > 1) {
+    riskScore += 30;
+    riskFactors.push(`${claimCount} claims filed for this device`);
+  }
+
+  // High rejection rate increases risk
+  if (claimCount > 0 && rejectedClaims / claimCount > 0.5) {
+    riskScore += 40;
+    riskFactors.push(`High rejection rate (${Math.round((rejectedClaims/claimCount)*100)}%)`);
+  }
+
+  // Cross-insurer claims increase risk
+  if (crossInsurer) {
+    riskScore += 25;
+    riskFactors.push(`Claims with ${uniqueInsurers} different insurers`);
+  }
+
+  if (recentClaims > 0) {
+    riskScore += 20;
+    riskFactors.push(`${recentClaims} claims within the last 30 days`);
+  }
+
+  if (highValueClaims > 0) {
+    riskScore += 15;
+    riskFactors.push(`${highValueClaims} high-value claims (>R10,000)`);
+  }
+
+  // Determine risk level and recommendation
+  let riskLevel: "LOW" | "MEDIUM" | "HIGH";
+  let recommendation: "ACCEPT" | "REJECT" | "REVIEW";
+
+  if (riskScore >= 60) {
+    riskLevel = "HIGH";
+    recommendation = "REJECT";
+  } else if (riskScore >= 30) {
+    riskLevel = "MEDIUM";
+    recommendation = "REVIEW";
+  } else {
+    riskLevel = "LOW";
+    recommendation = "ACCEPT";
+  }
+
+  const reasonText = riskFactors.length > 0 ? riskFactors.join(", ") : "Clean record with no significant risk factors";
+
+  // Build claim history
+  const claimHistory = allClaims
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .map((claim) => ({
+      id: claim.id,
+      imei: claim.imei,
+      serial: claim.serial,
+      device: `${claim.brand} ${claim.model}`,
+      date: new Date(claim.timestamp).toLocaleDateString(),
+      dateOfLoss: claim.dateOfLoss ? new Date(claim.dateOfLoss).toLocaleDateString() : "N/A",
+      outcome: claim.outcome.toUpperCase(),
+      amount: claim.amount,
+      insurer: claim.insurer ?? "Unknown",
+      reason: claim.reason ?? "Not specified"
+    }));
+
+  return { 
+    recommendation, 
+    reason: reasonText, 
+    riskLevel,
+    details: {
+      totalClaims: claimCount,
+      approvedClaims,
+      rejectedClaims,
+      pendingClaims,
+      searches,
+      uniqueInsurers,
+      crossInsurer,
+      recentClaims,
+      highValueClaims,
+      averageClaimAmount,
+      lastClaimDate,
+      riskFactors,
+      claimHistory
+    }
   };
 }

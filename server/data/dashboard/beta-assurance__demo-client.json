@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "searches": [
+    {
+      "id": "d88f9f76-2067-4b71-bff4-8bb989157b24",
+      "imei": "34425678908756432",
+      "searchedAt": "2026-04-09T16:54:26.054Z",
+      "resultFound": true,
+      "insurerId": "beta-assurance",
+      "userId": "demo-client"
+    }
+  ]
+}

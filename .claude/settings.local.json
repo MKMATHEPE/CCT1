@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(npx --prefix \"/Users/koketsom/Desktop/HTML/CCTM-- 2\" tsc --noEmit)"
+    ]
+  }
+}

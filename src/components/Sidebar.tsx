@@ -1,65 +1,70 @@
-import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChartLine,
   faClipboardCheck,
-  faDownload,
   faGear,
-  faMagnifyingGlass,
-  faTriangleExclamation,
 } from "@fortawesome/free-solid-svg-icons";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
 
 type Props = {
-  onLogout?: () => void;
-  onRecordClaim?: () => void;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
-  onOpenCase?: () => void;
-  onRegisterDevice?: () => void;
-  onDownloadAudit?: () => void;
+  theme: "dark" | "light";
+  isOpen: boolean;
 };
 
-export default function Sidebar({
-  collapsed = false,
-  onToggleCollapse,
-  onDownloadAudit,
-}: Props) {
+export default function Sidebar({ theme, isOpen }: Props) {
   const { user } = useAuth();
-  const isManager = user?.role === "manager" || user?.role === "admin";
-  const isAnalyst = user?.role === "analyst";
-  const [expanded, setExpanded] = useState({
-    investigations: true,
-    claimDevice: true,
-    settings: true,
-  });
+  const isClient = user?.role === "client";
+  const isAdmin = user?.role === "admin";
+  const location = useLocation();
+  const expanded = {
+    dashboard:
+      location.pathname === "/" ||
+      location.pathname.startsWith("/dashboard/"),
+    claimDevice:
+      location.pathname.startsWith("/claim-device") ||
+      location.pathname.startsWith("/search/"),
+    settings: location.pathname.startsWith("/settings"),
+  };
 
-  function navClass(active: boolean, compact: boolean) {
+  function navClass(active: boolean) {
     return `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition ${
       active
-        ? "bg-white text-gray-900 shadow-sm"
-        : "text-gray-800 hover:bg-white/80"
-    } ${compact ? "md:justify-center md:px-0" : ""}`;
+        ? theme === "dark"
+          ? "bg-white text-slate-950 shadow-[0_14px_30px_rgba(15,23,42,0.28)]"
+          : "bg-slate-900 text-white shadow-[0_14px_30px_rgba(148,163,184,0.18)]"
+        : theme === "dark"
+          ? "text-slate-300 hover:bg-white/6 hover:text-white"
+          : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-900"
+    }`;
   }
 
   function subNavClass(active: boolean) {
     return `w-full text-left text-sm transition ${
-      active ? "text-primary font-semibold" : "text-gray-600 hover:text-gray-900"
+      active
+        ? theme === "dark"
+          ? "text-red-400 font-semibold"
+          : "text-red-500 font-semibold"
+        : theme === "dark"
+          ? "text-slate-400 hover:text-white"
+          : "text-slate-500 hover:text-slate-900"
     }`;
   }
 
   return (
     <aside
-      className={`w-full shrink-0 border-b md:border-b-0 md:border-r border-border bg-[radial-gradient(120%_120%_at_0%_0%,#FFFFFF_0%,#F3F6FB_55%,#EEF2F8_100%)] transition-[width] duration-200 ${
-        collapsed ? "md:w-20" : "md:w-72"
+      aria-hidden={!isOpen}
+      className={`shrink-0 overflow-hidden border-b md:border-b-0 md:border-r transition-all duration-200 ${
+        theme === "dark"
+          ? "border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_35%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]"
+          : "border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_35%),linear-gradient(180deg,#f8fafc_0%,#eef4ff_100%)]"
+      } ${
+        isOpen
+          ? "w-full opacity-100 md:w-72"
+          : "pointer-events-none max-h-0 w-0 border-transparent opacity-0 md:max-h-none md:w-0 md:border-r-0"
       }`}
     >
-      <div
-        className={`h-full p-4 md:p-6 flex md:flex-col gap-4 md:gap-6 items-center md:items-stretch ${
-          collapsed ? "md:items-center" : ""
-        }`}
-      >
+      <div className="h-full p-4 md:p-6 flex md:flex-col gap-4 md:gap-6 items-center md:items-stretch">
         <div className="hidden md:block h-1" />
 
         <div className="flex-1 w-full flex md:flex-col gap-3 md:gap-4">
@@ -67,312 +72,146 @@ export default function Sidebar({
             <div>
               <NavLink
                 to="/"
-                className={({ isActive }) =>
-                  navClass(isActive, collapsed)
-                }
+                className={({ isActive }) => navClass(isActive)}
               >
                 <FontAwesomeIcon icon={faChartLine} className="w-4 h-4" />
-                <span className={collapsed ? "md:hidden" : ""}>
-                  Dashboard
-                </span>
+                <span>Dashboard</span>
               </NavLink>
+              {isAdmin && expanded.dashboard && (
+                <div className="mt-2 ml-6 space-y-1.5">
+                  <NavLink
+                    to="/"
+                    end
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 ${subNavClass(isActive)}`
+                    }
+                  >
+                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    Overview
+                  </NavLink>
+                  <NavLink
+                    to="/dashboard/clients"
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 ${subNavClass(isActive)}`
+                    }
+                  >
+                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    Client Dashboards
+                  </NavLink>
+                  <NavLink
+                    to="/dashboard/insights"
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 ${subNavClass(isActive)}`
+                    }
+                  >
+                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    Insights View
+                  </NavLink>
+                </div>
+              )}
             </div>
 
             <div>
               <NavLink
                 to="/claim-device"
-                onClick={() =>
-                  setExpanded((prev) => ({
-                    ...prev,
-                    claimDevice: !prev.claimDevice,
-                  }))
-                }
-                className={({ isActive }) =>
-                  navClass(isActive, collapsed)
-                }
-                aria-expanded={expanded.claimDevice}
+                className={({ isActive }) => navClass(isActive)}
               >
                 <FontAwesomeIcon
                   icon={faClipboardCheck}
                   className="w-4 h-4"
                 />
-                <span className={collapsed ? "md:hidden" : ""}>
-                  Claim Device
-                </span>
+                <span>Device Claims</span>
               </NavLink>
               <div
                 className={
-                  collapsed || !expanded.claimDevice
+                  !expanded.claimDevice
                     ? "hidden"
                     : "mt-2 ml-6 space-y-1.5"
                 }
               >
-                {isAnalyst && (
+                <NavLink
+                  to="/search/identifier"
+                  className={({ isActive }) =>
+                    `flex items-center gap-2 ${subNavClass(isActive)}`
+                  }
+                >
+                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                  Search Device
+                </NavLink>
+
+                {!isClient && (
                   <NavLink
-                    to="/claim-device/new"
+                    to="/claim-device/database"
                     className={({ isActive }) =>
                       `flex items-center gap-2 ${subNavClass(isActive)}`
                     }
                   >
-                    <span className="text-[10px] text-muted">•</span>
-                    New Claim
+                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    Device Database
                   </NavLink>
                 )}
                 <NavLink
-                  to="/claim-device/existing"
+                  to="/claim-device/new"
                   className={({ isActive }) =>
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className="text-[10px] text-muted">•</span>
-                  Existing Devices
-                </NavLink>
-                <NavLink
-                  to="/claim-device/duplicates"
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 ${subNavClass(isActive)}`
-                  }
-                >
-                  <span className="text-[10px] text-muted">•</span>
-                  Duplicate Devices
+                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                  Log A Claim
                 </NavLink>
               </div>
             </div>
 
             <div>
               <NavLink
-                to="/risk-queue"
-                className={({ isActive }) =>
-                  navClass(isActive, collapsed)
-                }
-              >
-                <FontAwesomeIcon
-                  icon={faTriangleExclamation}
-                  className="w-4 h-4"
-                />
-                <span className={collapsed ? "md:hidden" : ""}>
-                  Risk Queue
-                </span>
-              </NavLink>
-            </div>
-
-            <div>
-              <NavLink
-                to="/investigations/open"
-                onClick={() =>
-                  setExpanded((prev) => ({
-                    ...prev,
-                    investigations: !prev.investigations,
-                  }))
-                }
-                className={({ isActive }) =>
-                  navClass(isActive, collapsed)
-                }
-                aria-expanded={expanded.investigations}
-              >
-                <FontAwesomeIcon
-                  icon={faMagnifyingGlass}
-                  className="w-4 h-4"
-                />
-                <span className={collapsed ? "md:hidden" : ""}>
-                  Investigations
-                </span>
-              </NavLink>
-              <div
-                className={
-                  collapsed || !expanded.investigations
-                    ? "hidden"
-                    : "mt-2 ml-6 space-y-1.5"
-                }
-              >
-                {isAnalyst && (
-                  <NavLink
-                    to="/investigations/assigned"
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 ${subNavClass(isActive)}`
-                    }
-                  >
-                    <span className="text-[10px] text-muted">•</span>
-                    Assigned to Me
-                  </NavLink>
-                )}
-                <NavLink
-                  to="/investigations/open"
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 ${subNavClass(isActive)}`
-                  }
-                >
-                  <span className="text-[10px] text-muted">•</span>
-                  Open Cases
-                </NavLink>
-                <NavLink
-                  to="/investigations/high-risk"
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 ${subNavClass(isActive)}`
-                  }
-                >
-                  <span className="text-[10px] text-muted">•</span>
-                  High-Risk
-                </NavLink>
-                <NavLink
-                  to="/investigations/closed"
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 ${subNavClass(isActive)}`
-                  }
-                >
-                  <span className="text-[10px] text-muted">•</span>
-                  Closed Cases
-                </NavLink>
-              </div>
-            </div>
-
-            {isManager && (
-              <div>
-                <NavLink
-                  to="/insights/duplicate-rate"
-                  className={({ isActive }) =>
-                    navClass(isActive, collapsed)
-                  }
-                >
-                  <FontAwesomeIcon
-                    icon={faChartLine}
-                    className="w-4 h-4"
-                  />
-                  <span className={collapsed ? "md:hidden" : ""}>
-                    Insights
-                  </span>
-                </NavLink>
-                <div
-                  className={
-                    collapsed ? "hidden" : "mt-2 ml-6 space-y-1.5"
-                  }
-                >
-                  <NavLink
-                    to="/insights/duplicate-rate"
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 ${subNavClass(isActive)}`
-                    }
-                  >
-                    <span className="text-[10px] text-muted">•</span>
-                    Fraud Trends
-                  </NavLink>
-                  <NavLink
-                    to="/insights/fraud-prevented"
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 ${subNavClass(isActive)}`
-                    }
-                  >
-                    <span className="text-[10px] text-muted">•</span>
-                    Fraud Prevented
-                  </NavLink>
-                </div>
-              </div>
-            )}
-
-            <div>
-              <NavLink
-                to="/settings/profile"
-                onClick={() =>
-                  setExpanded((prev) => ({
-                    ...prev,
-                    settings: !prev.settings,
-                  }))
-                }
-                className={({ isActive }) =>
-                  navClass(isActive, collapsed)
-                }
-                aria-expanded={expanded.settings}
+                to="/settings/session"
+                className={({ isActive }) => navClass(isActive)}
               >
                 <FontAwesomeIcon icon={faGear} className="w-4 h-4" />
-                <span className={collapsed ? "md:hidden" : ""}>
-                  Settings
-                </span>
+                <span>Settings</span>
               </NavLink>
               <div
                 className={
-                  collapsed || !expanded.settings
+                  !expanded.settings
                     ? "hidden"
                     : "mt-2 ml-6 space-y-1.5"
                 }
               >
-                <NavLink
-                  to="/settings/profile"
-                  className={({ isActive }) =>
-                    `flex items-center gap-2 ${subNavClass(isActive)}`
-                  }
-                >
-                  <span className="text-[10px] text-muted">•</span>
-                  Profile
-                </NavLink>
-                {isManager && (
-                  <NavLink
-                    to="/settings/access"
-                    className={({ isActive }) =>
-                      `flex items-center gap-2 ${subNavClass(isActive)}`
-                    }
-                  >
-                    <span className="text-[10px] text-muted">•</span>
-                    Access & Role
-                  </NavLink>
-                )}
                 <NavLink
                   to="/settings/session"
                   className={({ isActive }) =>
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className="text-[10px] text-muted">•</span>
+                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
                   Session
                 </NavLink>
+                {isAdmin && (
+                  <NavLink
+                    to="/settings/users"
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 ${subNavClass(isActive)}`
+                    }
+                  >
+                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    Create User
+                  </NavLink>
+                )}
                 <NavLink
                   to="/settings/system"
                   className={({ isActive }) =>
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className="text-[10px] text-muted">•</span>
+                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
                   System Info
                 </NavLink>
               </div>
             </div>
           </nav>
 
-          <button
-            type="button"
-            onClick={onDownloadAudit}
-            disabled={!isManager || !onDownloadAudit}
-            title={
-              isManager
-                ? "Download the compliance-grade audit log"
-                : "Only managers can download the audit log"
-            }
-            className={`flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-white border border-border transition ${
-              collapsed ? "md:w-12 md:h-12 md:px-0" : ""
-            } ${
-              isManager
-                ? "hover:border-primary hover:text-primary"
-                : "opacity-60 cursor-not-allowed"
-            }`}
-          >
-            <span className="inline-flex items-center gap-2 justify-center">
-              <FontAwesomeIcon icon={faDownload} className="w-4 h-4" />
-              <span className={collapsed ? "md:hidden" : ""}>
-                Download Audit Log
-              </span>
-            </span>
-          </button>
-
           {/* Logout button intentionally removed per request */}
         </div>
-
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          className="hidden md:flex items-center justify-center w-10 h-10 rounded-full border border-border bg-white text-gray-700 hover:border-primary hover:text-primary transition"
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? ">" : "<"}
-        </button>
       </div>
     </aside>
   );

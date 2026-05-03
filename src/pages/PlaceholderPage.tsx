@@ -1,12 +1,14 @@
 type Props = {
   title: string;
   description?: string;
+  body?: string;
   badge?: string;
 };
 
 export default function PlaceholderPage({
   title,
   description,
+  body,
   badge,
 }: Props) {
   return (
@@ -26,9 +28,11 @@ export default function PlaceholderPage({
           {description}
         </p>
       )}
-      <div className="mt-4 text-sm text-gray-600">
-        This section is ready for wiring into your data sources.
-      </div>
+      {body && (
+        <div className="mt-4 text-sm text-gray-600">
+          {body}
+        </div>
+      )}
     </div>
   );
 }
