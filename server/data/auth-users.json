@@ -39,13 +39,6 @@
   ],
   "sessions": [
     {
-      "token": "b0c589b588f0610ada5922fa0ae1ed754cddffa71bb3dddc9767284179da6895",
-      "userId": "user-admin",
-      "createdAt": "2026-05-02T22:13:45.181Z",
-      "lastSeenAt": "2026-05-03T10:09:36.750Z",
-      "expiresAt": "2026-05-03T10:13:45.181Z"
-    },
-    {
       "token": "f8f6a2c5df6f6abc8c5fc60b1bb072889e39fc62e261b88f50d09440516c9ce6",
       "userId": "user-hh",
       "createdAt": "2026-05-03T08:14:44.785Z",
@@ -53,11 +46,11 @@
       "expiresAt": "2026-05-03T20:14:44.785Z"
     },
     {
-      "token": "0442e7ea5cbf045f3126fc6a8a1b19a211344779fb43098b9b9b3480a750bf68",
+      "token": "9f519a4c9f8da8189c1a010493d6165f1fcc381ebe443bfbd622cc9754c30361",
       "userId": "user-koki",
-      "createdAt": "2026-05-03T09:41:50.885Z",
-      "lastSeenAt": "2026-05-03T10:09:36.737Z",
-      "expiresAt": "2026-05-03T21:41:50.885Z"
+      "createdAt": "2026-05-03T10:25:19.766Z",
+      "lastSeenAt": "2026-05-03T13:31:32.182Z",
+      "expiresAt": "2026-05-03T22:25:19.766Z"
     }
   ]
 }
