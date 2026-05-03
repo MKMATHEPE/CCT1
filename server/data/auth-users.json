@@ -42,7 +42,7 @@
       "token": "b0c589b588f0610ada5922fa0ae1ed754cddffa71bb3dddc9767284179da6895",
       "userId": "user-admin",
       "createdAt": "2026-05-02T22:13:45.181Z",
-      "lastSeenAt": "2026-05-03T09:37:21.664Z",
+      "lastSeenAt": "2026-05-03T10:09:36.750Z",
       "expiresAt": "2026-05-03T10:13:45.181Z"
     },
     {
@@ -53,11 +53,11 @@
       "expiresAt": "2026-05-03T20:14:44.785Z"
     },
     {
-      "token": "f12076a9529f576ea2393bb0b2d1e6933a105d2ce724dc42267aec43a95e530d",
-      "userId": "user-alphainsure",
-      "createdAt": "2026-05-03T08:29:38.033Z",
-      "lastSeenAt": "2026-05-03T09:37:21.650Z",
-      "expiresAt": "2026-05-03T20:29:38.033Z"
+      "token": "0442e7ea5cbf045f3126fc6a8a1b19a211344779fb43098b9b9b3480a750bf68",
+      "userId": "user-koki",
+      "createdAt": "2026-05-03T09:41:50.885Z",
+      "lastSeenAt": "2026-05-03T10:09:36.737Z",
+      "expiresAt": "2026-05-03T21:41:50.885Z"
     }
   ]
 }
