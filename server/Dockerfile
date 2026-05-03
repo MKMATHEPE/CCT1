@@ -6,3 +6,5 @@ COPY . .
 RUN npm run build
 EXPOSE 8787
 CMD ["node", "dist/index.js"]
+
+# force rebuild
