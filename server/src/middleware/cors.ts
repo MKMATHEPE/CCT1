@@ -17,6 +17,7 @@ const ALLOWED_ORIGINS: ReadonlySet<string> = new Set(
     .map((o) => o.trim())
     .filter(Boolean),
 );
+console.log('[CORS] Allowed origins:', [...ALLOWED_ORIGINS]);
 
 const ALLOWED_METHODS = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
 const ALLOWED_HEADERS = 'Content-Type, Authorization, X-Requested-With';
