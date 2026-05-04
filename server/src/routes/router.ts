@@ -113,7 +113,7 @@ export async function handleRequest(request: IncomingMessage, response: ServerRe
 
   try {
     if (method === "GET" && url.pathname === "/health") {
-      return sendJson(response, 200, { status: "ok", ok: true });
+      return sendJson(response, 200, { status: "ok" });
     }
 
     if (method === "POST" && url.pathname === "/auth/login") {

@@ -8,7 +8,10 @@ let resolveApiBaseUrlPromise: Promise<string> | null = null;
 
 function configuredApiBaseUrl() {
   const configured = import.meta.env.VITE_API_BASE_URL?.trim();
-  return configured && configured.length > 0 ? configured.replace(/\/$/, "") : null;
+  if (!configured || configured.length === 0) return null;
+  // Strip trailing slash and any accidental /health suffix so routes like
+  // /auth/login are never prefixed with /health/auth/login.
+  return configured.replace(/\/health$/, "").replace(/\/$/, "");
 }
 
 export function getAuthenticatedApiHeaders(headers?: Record<string, string>) {
@@ -71,8 +74,8 @@ async function discoverApiBaseUrl() {
 
     try {
       const response = await fetch(`${baseUrl}/health`);
-      const payload = await parseJsonResponse<{ ok: boolean }>(response);
-      if (payload.ok) {
+      const payload = await parseJsonResponse<{ status?: string }>(response);
+      if (payload.status === "ok") {
         return baseUrl;
       }
     } catch {

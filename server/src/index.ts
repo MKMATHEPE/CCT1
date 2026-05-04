@@ -86,7 +86,7 @@ async function startServer() {
       );
     }
 
-    server.listen(selectedPort, () => {
+    server.listen(selectedPort, "0.0.0.0", () => {
       logger.info("api_server_started", {
         port: selectedPort,
         cacheTtlHours: env.cacheTtlHours,
@@ -99,7 +99,7 @@ async function startServer() {
         databaseUrlConfigured: Boolean(env.databaseUrl),
       });
 
-      console.log(`API running on http://localhost:${selectedPort}`);
+      console.log(`Server running on port ${selectedPort}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);

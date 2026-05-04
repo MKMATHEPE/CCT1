@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { env } from "../config/env.ts";
+import { resolveRuntimePath } from "../lib/paths.ts";
 import type {
   DashboardClaimRecord,
   DashboardSearchRecord,
@@ -36,7 +37,7 @@ function sanitizeKeyPart(value: string) {
 function getDashboardDbPath(scope: DashboardScope) {
   const insurerKey = sanitizeKeyPart(scope.insurerId);
   const userKey = sanitizeKeyPart(scope.userId);
-  return resolve(process.cwd(), env.dashboardDbDir, `${insurerKey}__${userKey}.json`);
+  return resolve(resolveRuntimePath(env.dashboardDbDir), `${insurerKey}__${userKey}.json`);
 }
 
 async function ensureDashboardFile(filePath: string) {

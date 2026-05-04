@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { dirname } from "node:path";
 import { env } from "../config/env.ts";
+import { resolveRuntimePath } from "../lib/paths.ts";
 import type { DatabaseShape } from "../types/domain.ts";
 
 const emptyDb: DatabaseShape = {
@@ -10,7 +11,7 @@ const emptyDb: DatabaseShape = {
   dashboardSearches: [],
 };
 
-const dbPath = resolve(process.cwd(), env.dbFile);
+const dbPath = resolveRuntimePath(env.dbFile);
 let writeQueue = Promise.resolve();
 
 async function ensureFile() {
