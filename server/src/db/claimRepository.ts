@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { env } from "../config/env.ts";
-import { supabase } from "../lib/supabase.ts";
+import supabase from "../lib/supabase.ts";
 import type {
   ClaimListItem,
   ClaimOutcome,

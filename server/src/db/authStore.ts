@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { env } from "../config/env.ts";
 import type { AuthDatabaseShape, AuthUser, SessionRecord } from "../types/auth.ts";
-import { supabase } from "../lib/supabase.ts";
+import supabase from "../lib/supabase.ts";
 import { resolveRuntimePath } from "../lib/paths.ts";
 
 const emptyAuthDb: AuthDatabaseShape = {
