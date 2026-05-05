@@ -30,16 +30,15 @@ setInterval(() => {
   }
 }, CLEANUP_INTERVAL_MS).unref(); // .unref() so it doesn't block shutdown
 
-/**
- * Extracts the client IP, respecting X-Forwarded-For behind a reverse proxy.
- * Railway / Render both set this header.
- */
 function getClientIp(req: IncomingMessage): string {
+  const remoteAddress = req.socket.remoteAddress ?? 'unknown';
   const forwarded = req.headers['x-forwarded-for'];
-  if (typeof forwarded === 'string') {
-    return forwarded.split(',')[0].trim();
+  if (typeof forwarded === 'string' && forwarded.trim()) {
+    // Rightmost IP is appended by the trusted proxy — not user-controlled.
+    const ips = forwarded.split(',').map((ip) => ip.trim()).filter(Boolean);
+    return ips[ips.length - 1] ?? remoteAddress;
   }
-  return req.socket.remoteAddress ?? 'unknown';
+  return remoteAddress;
 }
 
 /**

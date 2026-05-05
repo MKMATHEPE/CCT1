@@ -245,7 +245,6 @@ export async function searchClaims(mode: SearchMode, query: string): Promise<Sea
     const exists = await claimExists(claim);
 
     if (exists) {
-      console.log("Skipped duplicate:", claim);
       continue;
     }
 
@@ -253,7 +252,7 @@ export async function searchClaims(mode: SearchMode, query: string): Promise<Sea
     const highRisk = isHighRisk(claim, comparableClaims);
 
     if (highRisk) {
-      console.log("High risk detected:", claim);
+      logger.warn("claim_high_risk_detected", { externalId: claim.externalId, insurer: claim.insurer });
     }
 
     if (highRisk || isNewClaimForDevice(claim, comparableClaims)) {
@@ -262,9 +261,6 @@ export async function searchClaims(mode: SearchMode, query: string): Promise<Sea
       if (stored) {
         persistedClaims.push(claim);
         inserted += 1;
-        console.log("New claim stored:", claim);
-      } else {
-        console.log("Skipped duplicate:", claim);
       }
     }
   }

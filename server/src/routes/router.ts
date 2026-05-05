@@ -22,7 +22,7 @@ import { getAuthenticatedRequestUser } from "../lib/requestAuth.ts";
 import { registerRequest } from "../services/rateLimitService.ts";
 import { applyCors } from "../middleware/cors.ts";
 import { applySecurityHeaders } from "../middleware/securityHeaders.ts";
-import { isRateLimited, clearRateLimit } from "../middleware/rateLimiter.ts";
+import { checkLoginAllowed, recordLoginFailure, clearLoginFailures } from "../services/loginGuard.ts";
 import { searchClaims } from "../services/searchService.ts";
 import type { BulkManualClaimInput, ManualClaimInput, SearchMode } from "../types/domain.ts";
 
@@ -117,9 +117,14 @@ export async function handleRequest(request: IncomingMessage, response: ServerRe
     }
 
     if (method === "POST" && url.pathname === "/auth/login") {
-      if (isRateLimited(request, response)) {
+      const guard = checkLoginAllowed(ip);
+      if (!guard.allowed) {
+        response.setHeader("Retry-After", String(guard.retryAfterSeconds));
         logger.warn("auth.login.blocked", { ip });
-        return;
+        return sendJson(response, 429, {
+          error: "Too many failed login attempts. Please try again later.",
+          retryAfterSeconds: guard.retryAfterSeconds,
+        });
       }
 
       const body = await readJsonBody<{ username?: string; password?: string }>(request);
@@ -132,11 +137,12 @@ export async function handleRequest(request: IncomingMessage, response: ServerRe
 
       try {
         const session = await authenticateUser(username, password);
-        clearRateLimit(request);
+        clearLoginFailures(ip);
         logger.info("auth.login.success", { username, userId: session.user.id, ip });
         return sendJson(response, 200, session);
       } catch (loginError) {
         if (loginError instanceof HttpError && loginError.statusCode === 401) {
+          recordLoginFailure(ip);
           logger.warn("auth.login.failure", { username, ip });
         }
         throw loginError;
@@ -306,14 +312,12 @@ export async function handleRequest(request: IncomingMessage, response: ServerRe
         required: true,
       });
       const body = await readJsonBody<ManualClaimInput>(request);
-      console.log("[API] Incoming claim:", body);
       const claim = await createManualClaim(normalizeManualClaimInput(body));
 
       if (!claim) {
         throw new HttpError(409, "Claim already exists.");
       }
 
-      console.log("[DB] Claim saved successfully");
       sendJson(response, 201, { success: true, claim });
 
       if (authenticatedUser) {

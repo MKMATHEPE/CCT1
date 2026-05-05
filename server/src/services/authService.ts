@@ -1,4 +1,4 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, randomUUID, scryptSync, timingSafeEqual } from "node:crypto";
 import { env } from "../config/env.ts";
 import { HttpError } from "../lib/http.ts";
 import { logger } from "../lib/logger.ts";
@@ -102,8 +102,8 @@ function makeInsurerId(insurerName: string) {
     .replace(/^-+|-+$/g, "") || "client-insurer";
 }
 
-function makeUserId(username: string) {
-  return `user-${username.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+function makeUserId(_username: string) {
+  return randomUUID();
 }
 
 function normalizeUsername(username: string) {
@@ -115,6 +115,14 @@ function hashPassword(password: string) {
   const derived = scryptSync(password, salt, 64).toString("hex");
   return `${salt}:${derived}`;
 }
+
+// Dummy hash used to run scrypt even when the user doesn't exist, preventing
+// timing attacks that reveal valid usernames via response latency.
+const DUMMY_HASH = (() => {
+  const salt = "00000000000000000000000000000000";
+  const derived = scryptSync("dummy", salt, 64).toString("hex");
+  return `${salt}:${derived}`;
+})();
 
 function verifyPassword(password: string, storedHash: string) {
   const [salt, derived] = storedHash.split(":");
@@ -262,7 +270,8 @@ export async function authenticateUser(username: string, password: string) {
 
   if (!shouldUseFileStore()) {
     const user = await findUserByUsername(normalizedUsername);
-    if (!user || !verifyPassword(password, user.passwordHash)) {
+    const hashToVerify = user?.passwordHash ?? DUMMY_HASH;
+    if (!user || !verifyPassword(password, hashToVerify)) {
       throw new HttpError(401, "Invalid username or password.");
     }
     const session = buildSession(user.id);
@@ -277,7 +286,8 @@ export async function authenticateUser(username: string, password: string) {
 
   return mutateAuthDatabase((db) => {
     const user = db.users.find((entry) => entry.username === normalizedUsername);
-    if (!user || !verifyPassword(password, user.passwordHash)) {
+    const hashToVerify = user?.passwordHash ?? DUMMY_HASH;
+    if (!user || !verifyPassword(password, hashToVerify)) {
       throw new HttpError(401, "Invalid username or password.");
     }
 

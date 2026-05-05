@@ -25,19 +25,37 @@ export function getUrl(request: IncomingMessage) {
 }
 
 export function getClientIp(request: IncomingMessage) {
+  const remoteAddress = request.socket.remoteAddress ?? "unknown";
   const forwarded = request.headers["x-forwarded-for"];
+
   if (typeof forwarded === "string" && forwarded.trim()) {
-    return forwarded.split(",")[0]?.trim() ?? "unknown";
+    // Use the rightmost IP — this is the one appended by the trusted reverse
+    // proxy (Railway/Render/etc.) and cannot be spoofed by the client.
+    const ips = forwarded.split(",").map((ip) => ip.trim()).filter(Boolean);
+    return ips[ips.length - 1] ?? remoteAddress;
   }
 
-  return request.socket.remoteAddress ?? "unknown";
+  return remoteAddress;
 }
 
+const MAX_BODY_BYTES = 1 * 1024 * 1024; // 1 MB
+
 export async function readJsonBody<T>(request: IncomingMessage): Promise<T> {
+  const contentType = request.headers["content-type"] ?? "";
+  if (!contentType.toLowerCase().includes("application/json")) {
+    throw new HttpError(415, "Content-Type must be application/json");
+  }
+
   const chunks: Buffer[] = [];
+  let totalBytes = 0;
 
   for await (const chunk of request) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+    totalBytes += buf.byteLength;
+    if (totalBytes > MAX_BODY_BYTES) {
+      throw new HttpError(413, "Request body too large");
+    }
+    chunks.push(buf);
   }
 
   const raw = Buffer.concat(chunks).toString("utf8").trim();

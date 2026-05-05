@@ -10,14 +10,13 @@
 
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-/** Comma-separated allowlist loaded once at startup. */
+/** Comma-separated allowlist — prefers CORS_ALLOWED_ORIGINS, falls back to ALLOWED_ORIGINS. */
 const ALLOWED_ORIGINS: ReadonlySet<string> = new Set(
-  (process.env.ALLOWED_ORIGINS ?? '')
+  (process.env.CORS_ALLOWED_ORIGINS ?? process.env.ALLOWED_ORIGINS ?? '')
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean),
 );
-console.log('[CORS] Allowed origins:', [...ALLOWED_ORIGINS]);
 
 const ALLOWED_METHODS = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
 const ALLOWED_HEADERS = 'Content-Type, Authorization, X-Requested-With';

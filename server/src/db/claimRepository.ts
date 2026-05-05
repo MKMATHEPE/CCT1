@@ -1001,7 +1001,6 @@ export async function createManualClaim(input: {
       });
 
       db.claims.push(claim);
-      console.log("[ManualClaim] New claim saved:", normalizedClaim);
       return toClaimListItemFromRecords(claim, device);
     });
   }
