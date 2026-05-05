@@ -1,8 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
-
-if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
-  throw new Error("Missing Supabase environment variables");
-}
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -11,7 +7,10 @@ const supabase = createClient(
     realtime: {
       enabled: false,
     },
+    global: {
+      fetch: fetch // ensures no websocket fallback attempt
+    }
   }
-);
+)
 
-export default supabase;
+export default supabase
