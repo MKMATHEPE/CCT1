@@ -4,7 +4,6 @@ import {
   faBars,
   faMoon,
   faSun,
-  faUserCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../auth/useAuth";
 import { useLocation } from "react-router-dom";
@@ -71,96 +70,89 @@ const TopBar = ({
     };
   }, [menuOpen]);
 
+  const isDark = theme === "dark";
+
   return (
     <header
-      className={`min-h-[64px] flex items-center px-6 py-3 gap-6 ${
-        theme === "dark"
-          ? "border-b border-white/10 bg-[linear-gradient(180deg,#0f172a_0%,#020617_100%)] shadow-[0_18px_40px_rgba(2,6,23,0.32)]"
-          : "border-b border-slate-200 bg-[linear-gradient(180deg,#f8fafc_0%,#eef4ff_100%)] shadow-[0_18px_40px_rgba(148,163,184,0.18)]"
-      }`}
+      className="min-h-[60px] flex items-center px-6 py-3 gap-6"
+      style={isDark ? {
+        background: "#111827",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        boxShadow: "0 1px 0 rgba(255,255,255,0.03)",
+      } : {
+        background: "#ffffff",
+        borderBottom: "1px solid rgba(0,0,0,0.08)",
+        boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+      }}
     >
-      {/* Left - Page context */}
+      {/* Left */}
       <div className="flex flex-1 items-center gap-3">
         <button
           type="button"
           onClick={onToggleSidebar}
-          className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-            theme === "dark"
-              ? "border-white/10 bg-slate-950/60 text-slate-300 hover:border-white/20 hover:text-white"
-              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
-          }`}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition"
+          style={isDark ? {
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "#94a3b8",
+          } : {
+            background: "#f8fafc",
+            border: "1px solid rgba(0,0,0,0.1)",
+            color: "#64748b",
+          }}
           aria-label="Toggle sidebar"
-          title="Toggle sidebar"
         >
-          <FontAwesomeIcon icon={faBars} />
+          <FontAwesomeIcon icon={faBars} className="w-3.5 h-3.5" />
         </button>
 
         <div>
-        <div
-          className={`text-xs uppercase tracking-[0.22em] ${
-            theme === "dark" ? "text-slate-400" : "text-slate-500"
-          }`}
-        >
-          Claims Centre of Truth
-        </div>
-        <div
-          className={`text-xl font-semibold ${
-            theme === "dark" ? "text-white" : "text-slate-900"
-          }`}
-        >
-          {activeTitle}
-        </div>
+          <div className="text-[10px] uppercase tracking-[0.22em] font-medium" style={{ color: isDark ? "#475569" : "#94a3b8" }}>
+            Claims Centre of Truth
+          </div>
+          <div className="text-base font-semibold" style={{ color: isDark ? "#f8fafc" : "#0f172a" }}>
+            {activeTitle}
+          </div>
         </div>
       </div>
 
-      {/* Right - User */}
-      <div className="flex items-center gap-3">
+      {/* Right */}
+      <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={onToggleTheme}
-          className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition ${
-            theme === "dark"
-              ? "border-white/10 bg-slate-950/60 text-amber-300 hover:border-white/20 hover:text-amber-200"
-              : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
-          }`}
-          aria-label={
-            theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
-          }
-          title={theme === "dark" ? "Light mode" : "Dark mode"}
+          className="inline-flex h-9 w-9 items-center justify-center rounded-lg transition"
+          style={isDark ? {
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "#94a3b8",
+          } : {
+            background: "#f8fafc",
+            border: "1px solid rgba(0,0,0,0.1)",
+            color: "#64748b",
+          }}
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
         >
-          <FontAwesomeIcon icon={theme === "dark" ? faSun : faMoon} />
+          <FontAwesomeIcon icon={isDark ? faSun : faMoon} className="w-3.5 h-3.5" />
         </button>
 
         <div className="relative" ref={menuRef}>
           <button
             type="button"
-            onClick={() => setMenuOpen((current) => !current)}
-            className="flex items-center gap-3 rounded-2xl px-2 py-1 text-left transition hover:bg-white/5"
-            title="Account menu"
+            onClick={() => setMenuOpen((v) => !v)}
+            className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition"
+            style={isDark ? { color: "#94a3b8" } : { color: "#64748b" }}
           >
             <div
-              className={`rounded-full border p-1 ${
-                theme === "dark"
-                  ? "border-white/10 bg-slate-950/60 text-slate-300"
-                  : "border-slate-200 bg-white text-slate-600"
-              }`}
+              className="flex items-center justify-center w-7 h-7 rounded-full text-white text-xs font-semibold"
+              style={{ background: "linear-gradient(135deg,#f97316,#ef4444)" }}
             >
-              <FontAwesomeIcon icon={faUserCircle} className="w-7 h-7" />
+              {(user?.name ?? "U")[0].toUpperCase()}
             </div>
-
-            <div className="text-right text-sm">
-              <div
-                className={`font-semibold ${
-                  theme === "dark" ? "text-white" : "text-slate-900"
-                }`}
-              >
-                {user?.name ?? "Sasha Harper"}
+            <div className="text-left text-sm hidden sm:block">
+              <div className="font-semibold leading-tight" style={{ color: isDark ? "#f8fafc" : "#0f172a" }}>
+                {user?.name ?? "User"}
               </div>
-              <div
-                className={`text-xs ${
-                  theme === "dark" ? "text-slate-400" : "text-slate-500"
-                }`}
-              >
+              <div className="text-xs leading-tight" style={{ color: isDark ? "#475569" : "#94a3b8" }}>
                 {user?.role === "client" ? "Client" : "Admin"}
               </div>
             </div>
@@ -168,37 +160,34 @@ const TopBar = ({
 
           {menuOpen && (
             <div
-              className={`absolute right-0 top-[calc(100%+0.5rem)] z-30 w-40 rounded-2xl py-2 text-sm backdrop-blur ${
-                theme === "dark"
-                  ? "border border-white/10 bg-slate-950/95 shadow-[0_24px_60px_rgba(2,6,23,0.48)]"
-                  : "border border-slate-200 bg-white/95 shadow-[0_24px_60px_rgba(148,163,184,0.2)]"
-              }`}
+              className="absolute right-0 top-[calc(100%+6px)] z-30 w-40 rounded-xl py-1.5 text-sm"
+              style={isDark ? {
+                background: "#111827",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 16px 40px rgba(0,0,0,0.5)",
+              } : {
+                background: "#ffffff",
+                border: "1px solid rgba(0,0,0,0.08)",
+                boxShadow: "0 16px 40px rgba(0,0,0,0.12)",
+              }}
             >
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onSettings?.();
-                }}
-                className={`w-full px-4 py-2 text-left transition ${
-                  theme === "dark"
-                    ? "text-slate-200 hover:bg-white/5"
-                    : "text-slate-700 hover:bg-slate-100"
-                }`}
+                onClick={() => { setMenuOpen(false); onSettings?.(); }}
+                className="w-full px-4 py-2 text-left transition rounded-lg mx-auto"
+                style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "#f8fafc"; e.currentTarget.style.color = isDark ? "#f8fafc" : "#0f172a"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = isDark ? "#94a3b8" : "#64748b"; }}
               >
                 Settings
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setMenuOpen(false);
-                  onLogout?.();
-                }}
-                className={`w-full px-4 py-2 text-left transition ${
-                  theme === "dark"
-                    ? "text-rose-400 hover:bg-white/5"
-                    : "text-rose-600 hover:bg-slate-100"
-                }`}
+                onClick={() => { setMenuOpen(false); onLogout?.(); }}
+                className="w-full px-4 py-2 text-left transition"
+                style={{ color: "#f97316" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "#f8fafc"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
               >
                 Logout
               </button>

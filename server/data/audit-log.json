@@ -1,0 +1,35 @@
+[
+  {
+    "id": "61ba0159-4ab4-46d5-a921-46592451d4a6",
+    "timestampUtc": "2026-05-07T14:47:57.081Z",
+    "action": "LOGOUT",
+    "target": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "outcome": "SUCCESS",
+    "actor": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "actorRole": "client",
+    "context": "User logout"
+  },
+  {
+    "id": "83e1a8a1-75bb-44d6-9834-a4c3ff4a638f",
+    "timestampUtc": "2026-05-07T14:48:07.896Z",
+    "action": "LOGIN",
+    "target": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "outcome": "SUCCESS",
+    "actor": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "actorRole": "client",
+    "context": "User login",
+    "details": {
+      "role": "client"
+    }
+  },
+  {
+    "id": "01d54cd6-4112-4689-892b-9c48565335a2",
+    "timestampUtc": "2026-05-07T14:48:46.160Z",
+    "action": "SEARCH",
+    "target": "gdghgjhkjfhhgc",
+    "outcome": "FAILURE",
+    "actor": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "actorRole": "client",
+    "context": "Search by IMEI or Serial Number"
+  }
+]

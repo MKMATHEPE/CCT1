@@ -3,6 +3,7 @@ import {
   faChartLine,
   faClipboardCheck,
   faGear,
+  faClockRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
@@ -27,43 +28,40 @@ export default function Sidebar({ theme, isOpen }: Props) {
     settings: location.pathname.startsWith("/settings"),
   };
 
+  const isDark = theme === "dark";
+
   function navClass(active: boolean) {
-    return `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition ${
-      active
-        ? theme === "dark"
-          ? "bg-white text-slate-950 shadow-[0_14px_30px_rgba(15,23,42,0.28)]"
-          : "bg-slate-900 text-white shadow-[0_14px_30px_rgba(148,163,184,0.18)]"
-        : theme === "dark"
-          ? "text-slate-300 hover:bg-white/6 hover:text-white"
-          : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-900"
-    }`;
+    if (active) {
+      return isDark
+        ? "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-white"
+        : "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-900";
+    }
+    return isDark
+      ? "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-[#475569] hover:text-[#64748b]"
+      : "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-700";
   }
 
   function subNavClass(active: boolean) {
-    return `w-full text-left text-sm transition ${
-      active
-        ? theme === "dark"
-          ? "text-red-400 font-semibold"
-          : "text-red-500 font-semibold"
-        : theme === "dark"
-          ? "text-slate-400 hover:text-white"
-          : "text-slate-500 hover:text-slate-900"
-    }`;
+    if (active) return "w-full text-left text-sm font-semibold transition text-[#f97316]";
+    return isDark
+      ? "w-full text-left text-sm transition text-[#334155] hover:text-[#64748b]"
+      : "w-full text-left text-sm transition text-slate-400 hover:text-slate-700";
   }
 
   return (
     <aside
       aria-hidden={!isOpen}
       className={`shrink-0 overflow-hidden border-b md:border-b-0 md:border-r transition-all duration-200 ${
-        theme === "dark"
-          ? "border-white/10 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_35%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]"
-          : "border-slate-200 bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_35%),linear-gradient(180deg,#f8fafc_0%,#eef4ff_100%)]"
-      } ${
         isOpen
-          ? "w-full opacity-100 md:w-72"
+          ? "w-full opacity-100 md:w-64"
           : "pointer-events-none max-h-0 w-0 border-transparent opacity-0 md:max-h-none md:w-0 md:border-r-0"
       }`}
+      style={isDark
+        ? { background: "#0f172a", borderColor: "rgba(255,255,255,0.07)" }
+        : { background: "#f8fafc", borderColor: "rgba(0,0,0,0.08)" }
+      }
     >
+
       <div className="h-full p-4 md:p-6 flex md:flex-col gap-4 md:gap-6 items-center md:items-stretch">
         <div className="hidden md:block h-1" />
 
@@ -86,7 +84,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                       `flex items-center gap-2 ${subNavClass(isActive)}`
                     }
                   >
-                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                     Overview
                   </NavLink>
                   <NavLink
@@ -95,7 +93,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                       `flex items-center gap-2 ${subNavClass(isActive)}`
                     }
                   >
-                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                     Client Dashboards
                   </NavLink>
                   <NavLink
@@ -104,7 +102,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                       `flex items-center gap-2 ${subNavClass(isActive)}`
                     }
                   >
-                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                     Insights View
                   </NavLink>
                 </div>
@@ -135,7 +133,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                  <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                   Search Device
                 </NavLink>
 
@@ -146,7 +144,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                       `flex items-center gap-2 ${subNavClass(isActive)}`
                     }
                   >
-                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                     Device Database
                   </NavLink>
                 )}
@@ -156,7 +154,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                  <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                   Log A Claim
                 </NavLink>
               </div>
@@ -183,7 +181,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                  <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                   Session
                 </NavLink>
                 {isAdmin && (
@@ -193,7 +191,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
                       `flex items-center gap-2 ${subNavClass(isActive)}`
                     }
                   >
-                    <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                    <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                     Create User
                   </NavLink>
                 )}
@@ -203,12 +201,24 @@ export default function Sidebar({ theme, isOpen }: Props) {
                     `flex items-center gap-2 ${subNavClass(isActive)}`
                   }
                 >
-                  <span className={`text-[10px] ${theme === "dark" ? "text-slate-500" : "text-slate-400"}`}>•</span>
+                  <span className={`text-[10px] ${isDark ? "text-[#334155]" : "text-slate-300"}`}>•</span>
                   System Info
                 </NavLink>
               </div>
             </div>
           </nav>
+
+            {isAdmin && (
+              <div>
+                <NavLink
+                  to="/audit"
+                  className={({ isActive }) => navClass(isActive)}
+                >
+                  <FontAwesomeIcon icon={faClockRotateLeft} className="w-4 h-4" />
+                  <span>Audit Log</span>
+                </NavLink>
+              </div>
+            )}
 
           {/* Logout button intentionally removed per request */}
         </div>

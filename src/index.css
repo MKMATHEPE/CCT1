@@ -103,14 +103,7 @@
 }
 
 body {
-  background:
-    radial-gradient(circle at 14% 12%, rgba(96, 165, 250, 0.18), transparent 20%),
-    radial-gradient(circle at 82% 14%, rgba(125, 211, 252, 0.1), transparent 18%),
-    radial-gradient(circle at 50% 100%, rgba(30, 41, 59, 0.34), transparent 34%),
-    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.03), transparent 42%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%);
-  background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%, auto;
-  animation: cct-aurora-drift 52s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  background: #0b1120;
   color: #e2e8f0;
 }
 
@@ -122,33 +115,21 @@ body {
 }
 
 #root::before {
-  content: "";
-  position: fixed;
-  inset: -12%;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 18% 24%, rgba(96, 165, 250, 0.1), transparent 18%),
-    radial-gradient(circle at 78% 18%, rgba(125, 211, 252, 0.08), transparent 20%),
-    radial-gradient(circle at 70% 78%, rgba(255, 255, 255, 0.05), transparent 24%);
-  filter: blur(42px);
-  opacity: 0.4;
-  transform-origin: center;
-  animation: cct-aurora-parallax 96s ease-in-out infinite;
+  display: none;
 }
 
 .cct-theme {
-  --cct-surface: rgba(15, 23, 42, 0.88);
-  --cct-surface-strong: rgba(2, 6, 23, 0.92);
-  --cct-border: rgba(255, 255, 255, 0.1);
-  --cct-border-soft: rgba(255, 255, 255, 0.06);
-  --cct-glass-highlight: rgba(255, 255, 255, 0.08);
+  --cct-surface: rgba(17, 24, 39, 0.97);
+  --cct-surface-strong: rgba(15, 23, 42, 0.99);
+  --cct-border: rgba(255, 255, 255, 0.08);
+  --cct-border-soft: rgba(255, 255, 255, 0.05);
+  --cct-glass-highlight: rgba(255, 255, 255, 0.04);
   --cct-text: #f8fafc;
-  --cct-text-muted: #94a3b8;
-  --cct-text-soft: #cbd5e1;
-  --cct-accent: #ef4444;
-  --cct-accent-soft: rgba(239, 68, 68, 0.14);
-  --cct-shell: #020617;
+  --cct-text-muted: #64748b;
+  --cct-text-soft: #94a3b8;
+  --cct-accent: #f97316;
+  --cct-accent-soft: rgba(249, 115, 22, 0.12);
+  --cct-shell: #0b1120;
 }
 
 .cct-theme.cct-theme-light {
@@ -175,35 +156,19 @@ body {
 }
 
 .cct-theme .bg-bg {
-  background:
-    radial-gradient(circle at 12% 14%, rgba(59, 130, 246, 0.16), transparent 22%),
-    radial-gradient(circle at 84% 16%, rgba(14, 165, 233, 0.09), transparent 18%),
-    radial-gradient(circle at 50% 110%, rgba(15, 23, 42, 0.36), transparent 34%),
-    radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.03), transparent 44%),
-    linear-gradient(180deg, #020617 0%, #0f172a 100%) !important;
-  background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%, auto !important;
-  animation: cct-aurora-drift 56s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  background: #0b1120 !important;
 }
 
 .cct-theme.cct-theme-light .bg-bg {
-  background:
-    radial-gradient(circle at 14% 10%, rgba(103, 149, 194, 0.24), transparent 22%),
-    radial-gradient(circle at 82% 14%, rgba(160, 196, 225, 0.3), transparent 18%),
-    radial-gradient(circle at 88% 82%, rgba(215, 231, 245, 0.9), transparent 24%),
-    radial-gradient(circle at 48% 34%, rgba(255, 255, 255, 0.82), transparent 38%),
-    linear-gradient(180deg, #f3f8fc 0%, #eaf3fa 52%, #e3edf6 100%) !important;
-  background-size: 140% 140%, 140% 140%, 140% 140%, 140% 140%, auto !important;
-  animation: cct-aurora-drift 60s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  background: #f3f8fc !important;
 }
 
 .cct-theme .bg-white,
 .cct-theme .bg-card {
-  background: var(--cct-surface) !important;
+  background: #111827 !important;
   color: var(--cct-text);
-  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.34);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid var(--cct-border-soft);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 20px 40px rgba(0,0,0,0.32);
+  border: 1px solid rgba(255,255,255,0.07) !important;
   position: relative;
   overflow: hidden;
   animation: cct-rise-in 280ms ease-out;
@@ -224,18 +189,7 @@ body {
 
 .cct-theme .bg-white::before,
 .cct-theme .bg-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(
-      180deg,
-      var(--cct-glass-highlight) 0%,
-      rgba(255, 255, 255, 0.02) 38%,
-      rgba(255, 255, 255, 0) 100%
-    );
-  opacity: 0.7;
+  display: none;
 }
 
 .cct-theme .border-border {
@@ -288,29 +242,41 @@ body {
 }
 
 .cct-theme .bg-primary {
-  background-color: var(--cct-accent) !important;
+  background: linear-gradient(135deg, #f97316, #ef4444) !important;
+  box-shadow: 0 4px 20px rgba(239,68,68,0.25);
   transition:
-    background-color 180ms ease,
+    filter 180ms ease,
     box-shadow 180ms ease,
     transform 180ms ease;
 }
 
+.cct-theme .bg-primary:hover {
+  filter: brightness(1.08);
+}
+
 .cct-theme .hover\:border-primary:hover,
 .cct-theme .focus\:border-primary:focus {
-  border-color: #f87171 !important;
+  border-color: rgba(249, 115, 22, 0.6) !important;
 }
 
 .cct-theme .focus\:ring-primary:focus,
 .cct-theme .focus\:ring-primary\/30:focus {
-  --tw-ring-color: rgba(248, 113, 113, 0.22) !important;
+  --tw-ring-color: rgba(249, 115, 22, 0.15) !important;
+}
+
+.cct-theme input:focus,
+.cct-theme select:focus,
+.cct-theme textarea:focus {
+  border-color: rgba(249, 115, 22, 0.5) !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.08) !important;
 }
 
 .cct-theme input,
 .cct-theme select,
 .cct-theme textarea {
   color: var(--cct-text);
-  background-color: rgba(2, 6, 23, 0.66);
-  border-color: var(--cct-border);
+  background-color: #0f172a;
+  border-color: rgba(255,255,255,0.08);
   transition:
     border-color 180ms ease,
     box-shadow 180ms ease,

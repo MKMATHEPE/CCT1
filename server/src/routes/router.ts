@@ -24,6 +24,8 @@ import { applyCors } from "../middleware/cors.ts";
 import { applySecurityHeaders } from "../middleware/securityHeaders.ts";
 import { checkLoginAllowed, recordLoginFailure, clearLoginFailures } from "../services/loginGuard.ts";
 import { searchClaims } from "../services/searchService.ts";
+import { appendAuditEntry, readAuditEntries } from "../db/auditStore.ts";
+import { readAuthDatabase } from "../db/authStore.ts";
 import type { BulkManualClaimInput, ManualClaimInput, SearchMode } from "../types/domain.ts";
 
 function requireAdmin(user: Awaited<ReturnType<typeof getAuthenticatedRequestUser>>) {
@@ -114,6 +116,48 @@ export async function handleRequest(request: IncomingMessage, response: ServerRe
   try {
     if (method === "GET" && url.pathname === "/health") {
       return sendJson(response, 200, { status: "ok" });
+    }
+
+    // POST /audit — any authenticated user writes their own events
+    if (method === "POST" && url.pathname === "/audit") {
+      const authenticatedUser = await getAuthenticatedRequestUser(request, { required: true });
+      if (!authenticatedUser) throw new HttpError(401, "Authentication is required.");
+      const body = await readJsonBody<Record<string, unknown>>(request);
+      await appendAuditEntry({
+        id: typeof body.id === "string" ? body.id : crypto.randomUUID(),
+        timestampUtc: typeof body.timestampUtc === "string" ? body.timestampUtc : new Date().toISOString(),
+        action: String(body.action ?? "UNKNOWN"),
+        target: String(body.target ?? ""),
+        outcome: String(body.outcome ?? "RECORDED"),
+        actor: authenticatedUser.userId,
+        actorName: authenticatedUser.name,
+        actorRole: authenticatedUser.userRole ?? "unknown",
+        insurerName: authenticatedUser.insurerName,
+        context: String(body.context ?? ""),
+        details: typeof body.details === "object" && body.details !== null
+          ? body.details as Record<string, unknown>
+          : undefined,
+      });
+      return sendJson(response, 201, { ok: true });
+    }
+
+    // GET /audit — admin only, returns all persisted entries newest-first
+    if (method === "GET" && url.pathname === "/audit") {
+      const authenticatedUser = await getAuthenticatedRequestUser(request, { required: true });
+      requireAdmin(authenticatedUser);
+      const [entries, { users }] = await Promise.all([
+        readAuditEntries(),
+        readAuthDatabase(),
+      ]);
+      const userMap = new Map(
+        users.map((u) => [u.id, { name: u.name, insurerName: u.insurerName }])
+      );
+      const enriched = entries.map((e) => ({
+        ...e,
+        actorName:   e.actorName   || userMap.get(e.actor)?.name        || e.actor,
+        insurerName: e.insurerName || userMap.get(e.actor)?.insurerName || "Unknown",
+      }));
+      return sendJson(response, 200, { entries: enriched.slice().reverse() });
     }
 
     if (method === "POST" && url.pathname === "/auth/login") {

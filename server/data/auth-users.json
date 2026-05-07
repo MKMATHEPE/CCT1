@@ -35,15 +35,34 @@
       "createdAt": "2026-05-03T08:27:53.381Z",
       "updatedAt": "2026-05-03T08:27:53.381Z",
       "passwordHash": "5e85812ab95a5c1de60bcdab8b2aaa97:c565e438c1b844cd974e5b78a59ef00ae61500da8ccd0acf2df9cf4a549d5f44610cc3891172210aad3e75107103de10c98c28eb8b1cf1146433207547845b71"
+    },
+    {
+      "id": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+      "name": "blue",
+      "username": "blue",
+      "role": "client",
+      "insurerId": "blue-insure",
+      "insurerName": "Blue Insure",
+      "builtIn": false,
+      "createdAt": "2026-05-07T10:10:41.942Z",
+      "updatedAt": "2026-05-07T10:10:41.942Z",
+      "passwordHash": "e6b943e2ad8668d283de0b49a43c4545:bcab0eb3b650f4effc3c55b17528be9ea20115308c5eeb68e8a2bc3609a53666ba33e9441c8d908ab74dcb042559689755add731eb4578de7eae12823ab3d173"
     }
   ],
   "sessions": [
     {
-      "token": "cdef124bf33ed40dac5b68ead48b6d0444ff645594dc0cbc2f33febbb50d9177",
+      "token": "4d534d1898344df1f203f22f5fe7b38fea2742876ccd6e8674f6088bbe5f6652",
       "userId": "user-koki",
-      "createdAt": "2026-05-06T01:33:57.226Z",
-      "lastSeenAt": "2026-05-06T01:33:57.365Z",
-      "expiresAt": "2026-05-06T13:33:57.226Z"
+      "createdAt": "2026-05-07T10:10:12.215Z",
+      "lastSeenAt": "2026-05-07T18:18:16.952Z",
+      "expiresAt": "2026-05-07T22:10:12.215Z"
+    },
+    {
+      "token": "e04b155159dbcdccace453c3600c97472f4619c4ca9f48d7deaffa983e4cc76d",
+      "userId": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+      "createdAt": "2026-05-07T14:48:07.890Z",
+      "lastSeenAt": "2026-05-07T18:17:00.706Z",
+      "expiresAt": "2026-05-08T02:48:07.890Z"
     }
   ]
 }

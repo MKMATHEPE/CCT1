@@ -15,6 +15,7 @@ import SearchPage from "./pages/SearchPage";
 import PlaceholderPage from "./pages/PlaceholderPage";
 import ClaimDeviceNewClaimPage from "./pages/ClaimDeviceNewClaimPage";
 import ClaimDeviceDatabasePage from "./pages/ClaimDeviceDatabasePage";
+import AuditLogPage from "./pages/AuditLogPage";
 import LoggedOutPage from "./pages/LoggedOutPage";
 import { loginWithPassword } from "./services/authService";
 
@@ -44,9 +45,21 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(180deg,#020617_0%,#0f172a_100%)] text-white flex items-center justify-center">
-        <div className="rounded-3xl border border-white/10 bg-white/5 px-6 py-4 text-sm text-slate-300 backdrop-blur">
-          Restoring secure session...
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#0b1120" }}>
+        <div
+          className="flex items-center gap-3 rounded-xl px-5 py-3 text-sm"
+          style={{
+            background: "#111827",
+            border: "1px solid rgba(255,255,255,0.07)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
+            color: "#64748b",
+          }}
+        >
+          <svg className="w-4 h-4 animate-spin text-orange-500" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+            <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+          Restoring secure session…
         </div>
       </div>
     );
@@ -149,6 +162,10 @@ export default function App() {
               element={
                 user?.role === "admin" ? <SettingsPage view="access" /> : <AccessDenied />
               }
+            />
+            <Route
+              path="/audit"
+              element={isAdmin ? <AuditLogPage /> : <AccessDenied />}
             />
             <Route path="/settings/session" element={<SettingsPage view="session" />} />
             <Route

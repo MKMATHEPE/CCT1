@@ -1,8 +1,8 @@
 import { jsPDF } from "jspdf";
-import { getAuditLog } from "./auditLogService";
+import { getAuditLog, type AuditLogEntry } from "./auditLogService";
 
-export function exportAuditLogToPDF() {
-  const logs = getAuditLog();
+export function exportAuditLogToPDF(subset?: AuditLogEntry[]) {
+  const logs = subset ?? getAuditLog();
 
   if (logs.length === 0) {
     alert("No audit events to export.");
@@ -34,13 +34,15 @@ export function exportAuditLogToPDF() {
     const lines = [
       `#${index + 1}`,
       `Timestamp (UTC): ${log.timestampUtc}`,
+      `Actor: ${log.actorName ?? log.actor}`,
+      `Insurer: ${log.insurerName ?? "—"}`,
       `Action: ${log.action}`,
-      `Target: ${log.target}`,
       `Outcome: ${log.outcome}`,
-      `Actor: ${log.actor}`,
-      `Actor role: ${log.actorRole}`,
-      `Context: ${log.context}`,
     ];
+
+    if (log.target) {
+      lines.push(`Searched: ${log.target}`);
+    }
 
     if (log.details) {
       lines.push(`Details: ${JSON.stringify(log.details)}`);

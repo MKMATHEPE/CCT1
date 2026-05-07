@@ -48,27 +48,43 @@ export type AuditLogEntry = {
   target: string;
   outcome: AuditOutcome;
   actor: string;
+  actorName?: string;
   actorRole: string;
+  insurerName?: string;
   context: string;
   details?: Record<string, unknown>;
 };
 
-/**
- * Immutable in-memory log
- * (replace with API / DB later)
- */
+import { getAuthenticatedApiHeaders, resolveApiBaseUrl } from "./apiClient";
+
+// In-memory log kept for the local export-PDF fallback
 const auditLog: AuditLogEntry[] = [];
 
 export function writeAuditLog(
   entry: Omit<AuditLogEntry, "id" | "timestampUtc">
 ) {
-  auditLog.push({
+  const full: AuditLogEntry = {
     id: crypto.randomUUID(),
     timestampUtc: new Date().toISOString(),
     ...entry,
-  });
+  };
+
+  auditLog.push(full);
+
+  // Fire-and-forget POST to backend — never throws or blocks the caller
+  resolveApiBaseUrl()
+    .then((base) =>
+      fetch(`${base}/audit`, {
+        method: "POST",
+        headers: getAuthenticatedApiHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify(full),
+      })
+    )
+    .catch(() => {
+      // Silently swallow — audit write failures must never surface to the user
+    });
 }
 
 export function getAuditLog(): AuditLogEntry[] {
-  return [...auditLog]; // defensive copy
+  return [...auditLog];
 }

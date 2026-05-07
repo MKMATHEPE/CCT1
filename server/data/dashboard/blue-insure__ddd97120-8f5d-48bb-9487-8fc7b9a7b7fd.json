@@ -1,0 +1,13 @@
+{
+  "claims": [],
+  "searches": [
+    {
+      "id": "43610352-00c8-4448-99b2-609efb5fd2d0",
+      "imei": "gdghgjhkjfhhgc",
+      "searchedAt": "2026-05-07T14:48:46.033Z",
+      "resultFound": false,
+      "insurerId": "blue-insure",
+      "userId": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd"
+    }
+  ]
+}
