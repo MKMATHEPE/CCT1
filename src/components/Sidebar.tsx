@@ -34,18 +34,20 @@ export default function Sidebar({ theme, isOpen }: Props) {
     if (active) {
       return isDark
         ? "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-white"
-        : "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-900";
+        : "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-[#4a6073]";
     }
     return isDark
       ? "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-[#475569] hover:text-[#64748b]"
-      : "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-slate-700";
+      : "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition text-slate-400 hover:text-[#7088a0]";
   }
 
   function subNavClass(active: boolean) {
-    if (active) return "w-full text-left text-sm font-semibold transition text-[#f97316]";
+    if (active) return isDark
+      ? "w-full text-left text-sm font-semibold transition text-[#f97316]"
+      : "w-full text-left text-sm font-semibold transition text-[#f97316]";
     return isDark
       ? "w-full text-left text-sm transition text-[#334155] hover:text-[#64748b]"
-      : "w-full text-left text-sm transition text-slate-400 hover:text-slate-700";
+      : "w-full text-left text-sm transition text-slate-400 hover:text-[#7088a0]";
   }
 
   return (
@@ -58,7 +60,7 @@ export default function Sidebar({ theme, isOpen }: Props) {
       }`}
       style={isDark
         ? { background: "#0f172a", borderColor: "rgba(255,255,255,0.07)" }
-        : { background: "#f8fafc", borderColor: "rgba(0,0,0,0.08)" }
+        : { background: "#fafcfe", borderColor: "rgba(198,215,229,0.25)" }
       }
     >
 

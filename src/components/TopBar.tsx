@@ -81,8 +81,8 @@ const TopBar = ({
         boxShadow: "0 1px 0 rgba(255,255,255,0.03)",
       } : {
         background: "#ffffff",
-        borderBottom: "1px solid rgba(0,0,0,0.08)",
-        boxShadow: "0 1px 8px rgba(0,0,0,0.06)",
+        borderBottom: "1px solid rgba(198,215,229,0.25)",
+        boxShadow: "0 1px 8px rgba(130,168,200,0.08)",
       }}
     >
       {/* Left */}
@@ -109,7 +109,7 @@ const TopBar = ({
           <div className="text-[10px] uppercase tracking-[0.22em] font-medium" style={{ color: isDark ? "#475569" : "#94a3b8" }}>
             Claims Centre of Truth
           </div>
-          <div className="text-base font-semibold" style={{ color: isDark ? "#f8fafc" : "#0f172a" }}>
+          <div className="text-base font-semibold" style={{ color: isDark ? "#f8fafc" : "#5b6f84" }}>
             {activeTitle}
           </div>
         </div>
@@ -149,7 +149,7 @@ const TopBar = ({
               {(user?.name ?? "U")[0].toUpperCase()}
             </div>
             <div className="text-left text-sm hidden sm:block">
-              <div className="font-semibold leading-tight" style={{ color: isDark ? "#f8fafc" : "#0f172a" }}>
+              <div className="font-semibold leading-tight" style={{ color: isDark ? "#f8fafc" : "#5b6f84" }}>
                 {user?.name ?? "User"}
               </div>
               <div className="text-xs leading-tight" style={{ color: isDark ? "#475569" : "#94a3b8" }}>
@@ -176,7 +176,7 @@ const TopBar = ({
                 onClick={() => { setMenuOpen(false); onSettings?.(); }}
                 className="w-full px-4 py-2 text-left transition rounded-lg mx-auto"
                 style={{ color: isDark ? "#94a3b8" : "#64748b" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "#f8fafc"; e.currentTarget.style.color = isDark ? "#f8fafc" : "#0f172a"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "#f8fafc"; e.currentTarget.style.color = isDark ? "#f8fafc" : "#5b6f84"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = isDark ? "#94a3b8" : "#64748b"; }}
               >
                 Settings

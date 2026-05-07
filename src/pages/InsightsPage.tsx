@@ -1,3 +1,4 @@
+import { useTheme } from "../auth/themeContext";
 import {
   getClaimsGroupedByIMEI,
   getStats,
@@ -10,6 +11,7 @@ type Props = {
 
 export default function InsightsPage({ view }: Props) {
   useDeviceData();
+  const theme = useTheme();
   const stats = getStats();
   const grouped = getClaimsGroupedByIMEI();
   const totalDevices = Object.keys(grouped).length;
@@ -27,12 +29,18 @@ export default function InsightsPage({ view }: Props) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
+  const heading = theme === "light" ? "text-gray-900" : "text-white";
+  const body = theme === "light" ? "text-gray-700" : "text-slate-300";
+  const tableHead = theme === "light" ? "bg-[#dde6f0]/60 text-gray-600" : "bg-slate-800/60 text-slate-400";
+  const tableCell = theme === "light" ? "text-gray-600" : "text-slate-300";
+
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+      <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
+            <h2 className={`text-xl font-semibold ${heading}`}>
               Insights / Trends
             </h2>
             <p className="mt-1 text-sm text-muted">
@@ -44,33 +52,33 @@ export default function InsightsPage({ view }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
+        <div className={`${cardBg} border border-border rounded-xl p-5 shadow-sm`}>
           <div className="text-xs uppercase tracking-wide text-muted">
             Duplicate Rate
           </div>
-          <div className="mt-2 text-2xl font-semibold text-gray-900">
+          <div className={`mt-2 text-2xl font-semibold ${heading}`}>
             {duplicateRate}%
           </div>
           <div className="text-xs text-muted mt-1">
             Devices with multiple claims
           </div>
         </div>
-        <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
+        <div className={`${cardBg} border border-border rounded-xl p-5 shadow-sm`}>
           <div className="text-xs uppercase tracking-wide text-muted">
             Fraud Prevented
           </div>
-          <div className="mt-2 text-2xl font-semibold text-gray-900">
+          <div className={`mt-2 text-2xl font-semibold ${heading}`}>
             R {stats.fraudPrevented.toLocaleString()}
           </div>
           <div className="text-xs text-muted mt-1">
             Rejected claim value
           </div>
         </div>
-        <div className="bg-white border border-border rounded-xl p-5 shadow-sm">
+        <div className={`${cardBg} border border-border rounded-xl p-5 shadow-sm`}>
           <div className="text-xs uppercase tracking-wide text-muted">
             Duplicate Devices
           </div>
-          <div className="mt-2 text-2xl font-semibold text-gray-900">
+          <div className={`mt-2 text-2xl font-semibold ${heading}`}>
             {stats.duplicateDevices}
           </div>
           <div className="text-xs text-muted mt-1">
@@ -80,11 +88,11 @@ export default function InsightsPage({ view }: Props) {
       </div>
 
       {view === "duplicate-rate" && (
-        <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
+          <h3 className={`text-lg font-semibold ${heading}`}>
             Duplicate Rate Over Time
           </h3>
-          <p className="mt-2 text-sm text-muted">
+          <p className={`mt-2 text-sm ${body}`}>
             Trend visualization placeholder. Plug in time-series data
             for weekly duplicate rate.
           </p>
@@ -92,11 +100,11 @@ export default function InsightsPage({ view }: Props) {
       )}
 
       {view === "fraud-prevented" && (
-        <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
+          <h3 className={`text-lg font-semibold ${heading}`}>
             Fraud Prevented Trend
           </h3>
-          <p className="mt-2 text-sm text-muted">
+          <p className={`mt-2 text-sm ${body}`}>
             Trend visualization placeholder. Summarize rejected claim
             value by week or month.
           </p>
@@ -104,9 +112,9 @@ export default function InsightsPage({ view }: Props) {
       )}
 
       {view === "top-devices" && (
-        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+        <div className={`${cardBg} border border-border rounded-xl shadow-sm overflow-hidden`}>
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+            <thead className={`${tableHead} text-xs uppercase tracking-wide`}>
               <tr>
                 <th className="px-6 py-3 text-left">Device</th>
                 <th className="px-6 py-3 text-left">IMEI</th>
@@ -116,19 +124,16 @@ export default function InsightsPage({ view }: Props) {
             <tbody>
               {topDevices.map((row) => (
                 <tr key={row.imei} className="border-t border-border">
-                  <td className="px-6 py-4 font-medium text-gray-900">
+                  <td className={`px-6 py-4 font-medium ${heading}`}>
                     {row.device}
                   </td>
-                  <td className="px-6 py-4 text-gray-600">{row.imei}</td>
-                  <td className="px-6 py-4">{row.count}</td>
+                  <td className={`px-6 py-4 ${tableCell}`}>{row.imei}</td>
+                  <td className={`px-6 py-4 ${tableCell}`}>{row.count}</td>
                 </tr>
               ))}
               {topDevices.length === 0 && (
                 <tr>
-                  <td
-                    colSpan={3}
-                    className="px-6 py-8 text-center text-muted"
-                  >
+                  <td colSpan={3} className="px-6 py-8 text-center text-muted">
                     No duplicate devices yet.
                   </td>
                 </tr>

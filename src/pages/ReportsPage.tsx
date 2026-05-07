@@ -1,15 +1,21 @@
+import { useTheme } from "../auth/themeContext";
+
 type Props = {
   view: "case" | "monthly";
 };
 
 export default function ReportsPage({ view }: Props) {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
+  const heading = theme === "light" ? "text-gray-900" : "text-white";
+  const btnText = theme === "light" ? "text-gray-700" : "text-slate-300";
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+      <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Exports & Reports
+            <h2 className={`text-xl font-semibold ${heading}`}>
+              Exports &amp; Reports
             </h2>
             <p className="mt-1 text-sm text-muted">
               Compliance-grade outputs for audits and management.
@@ -22,8 +28,8 @@ export default function ReportsPage({ view }: Props) {
       </div>
 
       {view === "case" && (
-        <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
+          <h3 className={`text-lg font-semibold ${heading}`}>
             Case Report Export
           </h3>
           <p className="mt-2 text-sm text-muted">
@@ -31,10 +37,8 @@ export default function ReportsPage({ view }: Props) {
           </p>
           <button
             type="button"
-            onClick={() =>
-              alert("Case report export is coming next.")
-            }
-            className="mt-4 px-4 py-2 rounded-lg border border-border text-sm font-semibold text-gray-700 hover:border-primary hover:text-primary transition"
+            onClick={() => alert("Case report export is coming next.")}
+            className={`mt-4 px-4 py-2 rounded-lg border border-border text-sm font-semibold ${btnText} hover:border-primary hover:text-primary transition`}
           >
             Export case report
           </button>
@@ -42,8 +46,8 @@ export default function ReportsPage({ view }: Props) {
       )}
 
       {view === "monthly" && (
-        <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900">
+        <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
+          <h3 className={`text-lg font-semibold ${heading}`}>
             Monthly Fraud Summary
           </h3>
           <p className="mt-2 text-sm text-muted">
@@ -51,10 +55,8 @@ export default function ReportsPage({ view }: Props) {
           </p>
           <button
             type="button"
-            onClick={() =>
-              alert("Monthly fraud summary is coming next.")
-            }
-            className="mt-4 px-4 py-2 rounded-lg border border-border text-sm font-semibold text-gray-700 hover:border-primary hover:text-primary transition"
+            onClick={() => alert("Monthly fraud summary is coming next.")}
+            className={`mt-4 px-4 py-2 rounded-lg border border-border text-sm font-semibold ${btnText} hover:border-primary hover:text-primary transition`}
           >
             Export monthly summary
           </button>

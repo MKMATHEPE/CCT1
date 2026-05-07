@@ -1,3 +1,5 @@
+import { useTheme } from "../auth/themeContext";
+
 type Props = {
   title: string;
   description?: string;
@@ -11,10 +13,13 @@ export default function PlaceholderPage({
   body,
   badge,
 }: Props) {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
+  const heading = theme === "light" ? "text-gray-900" : "text-white";
   return (
-    <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
+    <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
       <div className="flex items-center gap-3">
-        <h2 className="text-xl font-semibold text-gray-900">
+        <h2 className={`text-xl font-semibold ${heading}`}>
           {title}
         </h2>
         {badge && (
@@ -29,7 +34,7 @@ export default function PlaceholderPage({
         </p>
       )}
       {body && (
-        <div className="mt-4 text-sm text-gray-600">
+        <div className={`mt-4 text-sm ${theme === "light" ? "text-gray-600" : "text-slate-300"}`}>
           {body}
         </div>
       )}

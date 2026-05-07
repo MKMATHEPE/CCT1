@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { AuditAction, AuditLogEntry } from "../services/auditLogService";
 import { exportAuditLogToPDF } from "../services/auditExportService";
 import { getAuthenticatedApiHeaders, resolveApiBaseUrl } from "../services/apiClient";
+import { useTheme } from "../auth/themeContext";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 function isUuid(s: string) { return UUID_RE.test(s); }
@@ -202,14 +203,23 @@ function UserListView({
   totalEvents: number;
   onSelect: (userId: string) => void;
 }) {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "#f5f9fd" : "#111827";
+  const border = theme === "light" ? "1px solid rgba(198,215,229,0.42)" : "1px solid rgba(255,255,255,0.07)";
+  const rowBorder = theme === "light" ? "1px solid rgba(198,215,229,0.3)" : "1px solid rgba(255,255,255,0.05)";
+  const rowHover = theme === "light" ? "#eaf1f8" : "#141f35";
+  const textMain = theme === "light" ? "#1e293b" : "#ffffff";
+  const textSub = theme === "light" ? "#5b6f84" : "#475569";
+  const textMuted = theme === "light" ? "#8296a8" : "#334155";
+
   return (
     <div className="space-y-5">
       {/* Header */}
       <div className="rounded-xl p-5 flex items-center justify-between"
-        style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}>
+        style={{ background: cardBg, border }}>
         <div>
-          <h1 className="text-xl font-semibold text-white">Audit Log</h1>
-          <p className="mt-0.5 text-sm" style={{ color: "#475569" }}>
+          <h1 className="text-xl font-semibold" style={{ color: textMain }}>Audit Log</h1>
+          <p className="mt-0.5 text-sm" style={{ color: textSub }}>
             {users.length} user{users.length !== 1 ? "s" : ""} · {totalEvents} total events · auto-refreshes every 15 s
           </p>
         </div>
@@ -217,14 +227,13 @@ function UserListView({
 
       {/* User cards */}
       {users.length === 0 ? (
-        <div className="rounded-xl p-12 text-center"
-          style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm" style={{ color: "#334155" }}>
+        <div className="rounded-xl p-12 text-center" style={{ background: cardBg, border }}>
+          <p className="text-sm" style={{ color: textMuted }}>
             No audit events recorded yet. User activity will appear here.
           </p>
         </div>
       ) : (
-        <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-xl overflow-hidden" style={{ border }}>
           {users.map((u, i) => (
             <button
               key={u.userId}
@@ -232,17 +241,17 @@ function UserListView({
               onClick={() => onSelect(u.userId)}
               className="w-full text-left flex items-center gap-4 px-5 py-4 transition-all"
               style={{
-                background: "#111827",
-                borderTop: i > 0 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                background: cardBg,
+                borderTop: i > 0 ? rowBorder : "none",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#141f35"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "#111827"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = rowHover; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = cardBg; }}
             >
               {/* Insurer + username */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{u.insurerName}</p>
+                <p className="text-sm font-semibold truncate" style={{ color: textMain }}>{u.insurerName}</p>
                 {!isUuid(u.actorName) && (
-                  <p className="text-xs mt-0.5 truncate" style={{ color: "#475569" }}>@{u.actorName}</p>
+                  <p className="text-xs mt-0.5 truncate" style={{ color: textSub }}>@{u.actorName}</p>
                 )}
               </div>
 
@@ -251,20 +260,20 @@ function UserListView({
 
               {/* Events */}
               <div className="text-right hidden sm:block" style={{ minWidth: "60px" }}>
-                <p className="text-xs" style={{ color: "#334155" }}>Events</p>
-                <p className="text-sm font-semibold text-white">{u.eventCount}</p>
+                <p className="text-xs" style={{ color: textMuted }}>Events</p>
+                <p className="text-sm font-semibold" style={{ color: textMain }}>{u.eventCount}</p>
               </div>
 
               {/* Last seen */}
               <div className="text-right hidden md:block" style={{ minWidth: "90px" }}>
-                <p className="text-xs" style={{ color: "#334155" }}>Last seen</p>
-                <p className="text-sm font-medium text-white">{formatRelative(u.lastSeenAt)}</p>
+                <p className="text-xs" style={{ color: textMuted }}>Last seen</p>
+                <p className="text-sm font-medium" style={{ color: textMain }}>{formatRelative(u.lastSeenAt)}</p>
               </div>
 
               {/* Date */}
               <div className="text-right hidden lg:block" style={{ minWidth: "100px" }}>
-                <p className="text-xs" style={{ color: "#334155" }}>Date</p>
-                <p className="text-xs text-white">
+                <p className="text-xs" style={{ color: textMuted }}>Date</p>
+                <p className="text-xs" style={{ color: textMain }}>
                   {new Date(u.lastSeenAt).toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" })}
                 </p>
               </div>
@@ -294,6 +303,15 @@ function UserLogView({
   entries: AuditLogEntry[];
   onBack: () => void;
 }) {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "#f5f9fd" : "#111827";
+  const border = theme === "light" ? "1px solid rgba(198,215,229,0.42)" : "1px solid rgba(255,255,255,0.07)";
+  const inputBg = theme === "light" ? "#edf4fa" : "#0f172a";
+  const inputBorder = theme === "light" ? "rgba(198,215,229,0.42)" : "rgba(255,255,255,0.08)";
+  const inputColor = theme === "light" ? "#1e293b" : "#ffffff";
+  const textSub = theme === "light" ? "#5b6f84" : "#475569";
+  const textMain = theme === "light" ? "#1e293b" : "#ffffff";
+
   const [search, setSearch]     = useState("");
   const [group, setGroup]       = useState("All");
   const [outcome, setOutcome]   = useState("All");
@@ -324,15 +342,15 @@ function UserLogView({
     <div className="space-y-5">
       {/* Header */}
       <div className="rounded-xl p-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
-        style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}>
+        style={{ background: cardBg, border }}>
         <div>
           <button
             type="button"
             onClick={onBack}
             className="inline-flex items-center gap-1.5 text-sm mb-3 transition"
-            style={{ color: "#475569" }}
+            style={{ color: textSub }}
             onMouseEnter={(e) => { e.currentTarget.style.color = "#f97316"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = "#475569"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = textSub; }}
           >
             <svg viewBox="0 0 16 16" fill="currentColor" className="w-3.5 h-3.5">
               <path fillRule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L6.81 8l2.97 2.72a.75.75 0 1 1-1.04 1.06l-3.5-3.25a.75.75 0 0 1 0-1.06l3.5-3.25a.75.75 0 0 1 1.06 0Z" clipRule="evenodd" />
@@ -343,13 +361,13 @@ function UserLogView({
           <div className="flex items-center gap-4">
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl font-semibold text-white">{user.insurerName}</h1>
+                <h1 className="text-xl font-semibold" style={{ color: textMain }}>{user.insurerName}</h1>
                 {!isUuid(user.actorName) && (
-                  <span className="text-sm" style={{ color: "#475569" }}>@{user.actorName}</span>
+                  <span className="text-sm" style={{ color: textSub }}>@{user.actorName}</span>
                 )}
                 <Badge label={user.actorRole} variant={user.actorRole === "admin" ? "orange" : "slate"} />
               </div>
-              <p className="text-sm mt-0.5" style={{ color: "#475569" }}>
+              <p className="text-sm mt-0.5" style={{ color: textSub }}>
                 {filtered.length} of {user.eventCount} events
               </p>
             </div>
@@ -373,34 +391,34 @@ function UserLogView({
 
       {/* Filters */}
       <div className="rounded-xl p-4 flex flex-wrap gap-3"
-        style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}>
+        style={{ background: cardBg, border }}>
         {/* Search */}
         <div className="relative flex-1 min-w-[180px]">
-          <svg viewBox="0 0 20 20" fill="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: "#475569" }}>
+          <svg viewBox="0 0 20 20" fill="currentColor" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: textSub }}>
             <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clipRule="evenodd" />
           </svg>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search action, target, context…"
-            className="w-full rounded-lg pl-9 pr-3 py-2 text-sm text-white outline-none"
-            style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", caretColor: "#f97316" }}
+            className="w-full rounded-lg pl-9 pr-3 py-2 text-sm outline-none"
+            style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor, caretColor: "#f97316" }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(249,115,22,0.08)"; }}
-            onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.boxShadow = "none"; }}
+            onBlur={(e)  => { e.currentTarget.style.borderColor = inputBorder; e.currentTarget.style.boxShadow = "none"; }}
           />
         </div>
 
         {/* Category */}
         <select value={group} onChange={(e) => setGroup(e.target.value)}
           className="rounded-lg px-3 py-2 text-sm outline-none"
-          style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", color: "#94a3b8" }}>
+          style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor }}>
           {GROUP_OPTIONS.map((g) => <option key={g} value={g}>{g === "All" ? "All categories" : g}</option>)}
         </select>
 
         {/* Outcome */}
         <select value={outcome} onChange={(e) => setOutcome(e.target.value)}
           className="rounded-lg px-3 py-2 text-sm outline-none"
-          style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", color: "#94a3b8" }}>
+          style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor }}>
           {["All","SUCCESS","FAILURE","AUTO_REJECT","RECORDED"].map((o) => (
             <option key={o} value={o}>{o === "All" ? "All outcomes" : o}</option>
           ))}
@@ -408,27 +426,27 @@ function UserLogView({
 
         {/* Date range */}
         <div className="flex items-center gap-2">
-          <label className="text-xs shrink-0" style={{ color: "#475569" }}>From</label>
+          <label className="text-xs shrink-0" style={{ color: textSub }}>From</label>
           <input
             type="date"
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
             className="rounded-lg px-3 py-2 text-sm outline-none"
-            style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", color: fromDate ? "#f8fafc" : "#475569", colorScheme: "dark" }}
+            style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: fromDate ? inputColor : textSub, colorScheme: theme === "light" ? "light" : "dark" }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; }}
-            onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+            onBlur={(e)  => { e.currentTarget.style.borderColor = inputBorder; }}
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-xs shrink-0" style={{ color: "#475569" }}>To</label>
+          <label className="text-xs shrink-0" style={{ color: textSub }}>To</label>
           <input
             type="date"
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
             className="rounded-lg px-3 py-2 text-sm outline-none"
-            style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", color: toDate ? "#f8fafc" : "#475569", colorScheme: "dark" }}
+            style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: toDate ? inputColor : textSub, colorScheme: theme === "light" ? "light" : "dark" }}
             onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; }}
-            onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
+            onBlur={(e)  => { e.currentTarget.style.borderColor = inputBorder; }}
           />
         </div>
 
@@ -444,9 +462,8 @@ function UserLogView({
 
       {/* Entries */}
       {filtered.length === 0 ? (
-        <div className="rounded-xl p-12 text-center"
-          style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}>
-          <p className="text-sm" style={{ color: "#334155" }}>
+        <div className="rounded-xl p-12 text-center" style={{ background: cardBg, border }}>
+          <p className="text-sm" style={{ color: textSub }}>
             {entries.length === 0 ? "No events recorded for this user yet." : "No events match the current filters."}
           </p>
         </div>
@@ -473,40 +490,47 @@ function AuditRow({ entry, isExpanded, onToggle }: {
   isExpanded: boolean;
   onToggle: () => void;
 }) {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "#f5f9fd" : "#111827";
+  const borderColor = isExpanded ? "rgba(249,115,22,0.25)" : (theme === "light" ? "rgba(198,215,229,0.42)" : "rgba(255,255,255,0.06)");
+  const dividerColor = theme === "light" ? "rgba(198,215,229,0.4)" : "rgba(255,255,255,0.05)";
+  const tsColor = theme === "light" ? "#8296a8" : "#334155";
+  const actionColor = theme === "light" ? "#5b6f84" : "#64748b";
+  const preBg = theme === "light" ? "#edf4fa" : "#0f172a";
   const grp = actionGroup(entry.action);
   return (
     <div className="rounded-xl overflow-hidden transition-all"
-      style={{ background: "#111827", border: `1px solid ${isExpanded ? "rgba(249,115,22,0.25)" : "rgba(255,255,255,0.06)"}` }}>
+      style={{ background: cardBg, border: `1px solid ${borderColor}` }}>
       <button type="button" className="w-full text-left px-4 py-3 flex items-center gap-4" onClick={onToggle}>
         <span className="hidden lg:block shrink-0 text-xs tabular-nums font-mono"
-          style={{ color: "#334155", minWidth: "160px" }}>
+          style={{ color: tsColor, minWidth: "160px" }}>
           {formatTs(entry.timestampUtc)}
         </span>
         <span className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
           <Badge label={grp} variant={groupVariant(grp)} />
-          <span className="text-xs font-mono" style={{ color: "#64748b" }}>{entry.action}</span>
+          <span className="text-xs font-mono" style={{ color: actionColor }}>{entry.action}</span>
         </span>
         <span className="shrink-0">
           <Badge label={entry.outcome} variant={outcomeVariant(entry.outcome)} />
         </span>
         <svg viewBox="0 0 20 20" fill="currentColor" className="shrink-0 w-4 h-4 transition-transform"
-          style={{ color: "#334155", transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
+          style={{ color: tsColor, transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)" }}>
           <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
         </svg>
       </button>
 
       {isExpanded && (
         <div className="px-4 pb-4 grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3 text-xs"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+          style={{ borderTop: `1px solid ${dividerColor}` }}>
           <Detail label="Timestamp" value={formatTs(entry.timestampUtc)} />
           <Detail label="Action"    value={entry.action} />
           <Detail label="Outcome"   value={entry.outcome} />
           {entry.target && <Detail label="Searched" value={entry.target} />}
           {entry.details && (
             <div className="col-span-2 md:col-span-3">
-              <p className="mb-1 font-medium" style={{ color: "#475569" }}>Details</p>
+              <p className="mb-1 font-medium" style={{ color: actionColor }}>Details</p>
               <pre className="rounded-lg px-3 py-2 text-xs overflow-x-auto"
-                style={{ background: "#0f172a", color: "#64748b", border: "1px solid rgba(255,255,255,0.05)" }}>
+                style={{ background: preBg, color: actionColor, border: `1px solid ${dividerColor}` }}>
                 {JSON.stringify(entry.details, null, 2)}
               </pre>
             </div>
@@ -520,19 +544,25 @@ function AuditRow({ entry, isExpanded, onToggle }: {
 // ── Shared ────────────────────────────────────────────────────────────────
 
 function Detail({ label, value, className = "" }: { label: string; value: string; className?: string }) {
+  const theme = useTheme();
+  const labelColor = theme === "light" ? "#8296a8" : "#334155";
+  const valueColor = theme === "light" ? "#5b6f84" : "#64748b";
   return (
     <div className={className}>
-      <p className="font-medium mb-0.5" style={{ color: "#334155" }}>{label}</p>
-      <p className="font-mono break-all" style={{ color: "#64748b" }}>{value}</p>
+      <p className="font-medium mb-0.5" style={{ color: labelColor }}>{label}</p>
+      <p className="font-mono break-all" style={{ color: valueColor }}>{value}</p>
     </div>
   );
 }
 
 function LoadingState() {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "#f5f9fd" : "#111827";
+  const border = theme === "light" ? "1px solid rgba(198,215,229,0.42)" : "1px solid rgba(255,255,255,0.07)";
+  const textColor = theme === "light" ? "#8296a8" : "#334155";
   return (
-    <div className="rounded-xl p-12 text-center"
-      style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}>
-      <div className="flex items-center justify-center gap-2 text-sm" style={{ color: "#334155" }}>
+    <div className="rounded-xl p-12 text-center" style={{ background: cardBg, border }}>
+      <div className="flex items-center justify-center gap-2 text-sm" style={{ color: textColor }}>
         <svg className="w-4 h-4 animate-spin" style={{ color: "#f97316" }} fill="none" viewBox="0 0 24 24">
           <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
           <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
@@ -544,9 +574,11 @@ function LoadingState() {
 }
 
 function ErrorState({ message }: { message: string }) {
+  const theme = useTheme();
+  const cardBg = theme === "light" ? "#f5f9fd" : "#111827";
   return (
     <div className="rounded-xl p-12 text-center"
-      style={{ background: "#111827", border: "1px solid rgba(239,68,68,0.2)" }}>
+      style={{ background: cardBg, border: "1px solid rgba(239,68,68,0.2)" }}>
       <p className="text-sm" style={{ color: "#f87171" }}>{message}</p>
     </div>
   );

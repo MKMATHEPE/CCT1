@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useClaims, type Claim } from "../services/deviceDataService";
+import { useTheme } from "../auth/themeContext";
 
 type Row = Claim & {
   deviceName: string;
@@ -30,6 +31,8 @@ export default function ClaimDeviceDatabasePage() {
   const [rowsPerPage, setRowsPerPage] = useState(30);
   const [page, setPage] = useState(1);
   const claims = useClaims();
+  const theme = useTheme();
+
   const rows = useMemo<Row[]>(() => {
     return claims
       .map((claim) => ({
@@ -49,15 +52,23 @@ export default function ClaimDeviceDatabasePage() {
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
   }, [claims]);
+
   const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
   const currentPage = Math.min(page, totalPages);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const pagedRows = rows.slice(startIndex, startIndex + rowsPerPage);
 
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
+  const heading = theme === "light" ? "text-gray-900" : "text-white";
+  const cell = theme === "light" ? "text-gray-600" : "text-slate-300";
+  const cellMuted = theme === "light" ? "text-gray-500" : "text-slate-400";
+  const tableHead = theme === "light" ? "bg-[#dde6f0]/60 text-gray-600" : "bg-slate-800/60 text-slate-400";
+  const controlBg = theme === "light" ? "bg-[#eaf1f8] text-slate-600 border-border" : "bg-slate-950 text-white border-white/10";
+
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-border rounded-xl p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-gray-900">
+      <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
+        <h2 className={`text-xl font-semibold ${heading}`}>
           Device Database
         </h2>
         <p className="mt-1 text-sm text-muted">
@@ -65,13 +76,13 @@ export default function ClaimDeviceDatabasePage() {
         </p>
       </div>
 
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="text-sm text-gray-600">
+      <div className={`${cardBg} border border-border rounded-xl p-4 shadow-sm flex flex-col gap-3 md:flex-row md:items-center md:justify-between`}>
+        <div className={`text-sm ${cell}`}>
           Showing {rows.length === 0 ? 0 : startIndex + 1}-
           {Math.min(startIndex + rowsPerPage, rows.length)} of {rows.length}
         </div>
         <div className="flex items-center gap-3">
-          <label htmlFor="rows-per-page" className="text-sm text-gray-600">
+          <label htmlFor="rows-per-page" className={`text-sm ${cell}`}>
             Rows per page
           </label>
           <select
@@ -81,7 +92,7 @@ export default function ClaimDeviceDatabasePage() {
               setRowsPerPage(Number(event.target.value));
               setPage(1);
             }}
-            className="rounded-lg border border-border bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            className={`rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-orange-400/60 focus:ring-2 focus:ring-orange-400/20 ${controlBg}`}
           >
             {[10, 30, 50, 100].map((option) => (
               <option key={option} value={option}>
@@ -92,9 +103,9 @@ export default function ClaimDeviceDatabasePage() {
         </div>
       </div>
 
-      <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+      <div className={`${cardBg} border border-border rounded-xl shadow-sm overflow-hidden`}>
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+          <thead className={`${tableHead} text-xs uppercase tracking-wide`}>
             <tr>
               <th className="px-6 py-3 text-left">No.</th>
               <th className="px-6 py-3 text-left">IMEI / Serial Number</th>
@@ -109,39 +120,24 @@ export default function ClaimDeviceDatabasePage() {
           <tbody>
             {pagedRows.map((row, index) => (
               <tr key={row.id} className="border-t border-border">
-                <td className="px-6 py-4 text-gray-500">
+                <td className={`px-6 py-4 ${cellMuted}`}>
                   {startIndex + index + 1}
                 </td>
-                <td className="px-6 py-4 text-gray-600">
+                <td className={`px-6 py-4 ${cell}`}>
                   <div>{row.imei}</div>
-                  <div className="text-xs text-gray-500">{row.serial}</div>
+                  <div className={`text-xs ${cellMuted}`}>{row.serial}</div>
                 </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {row.deviceName}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {row.insurer ?? "Unknown"}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {row.outcomeLabel}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {row.dateOfLossLabel}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {row.amountLabel}
-                </td>
-                <td className="px-6 py-4 text-gray-600">
-                  {row.reason ?? "—"}
-                </td>
+                <td className={`px-6 py-4 ${cell}`}>{row.deviceName}</td>
+                <td className={`px-6 py-4 ${cell}`}>{row.insurer ?? "Unknown"}</td>
+                <td className={`px-6 py-4 ${cell}`}>{row.outcomeLabel}</td>
+                <td className={`px-6 py-4 ${cell}`}>{row.dateOfLossLabel}</td>
+                <td className={`px-6 py-4 ${cell}`}>{row.amountLabel}</td>
+                <td className={`px-6 py-4 ${cell}`}>{row.reason ?? "—"}</td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td
-                  colSpan={8}
-                  className="px-6 py-8 text-center text-muted"
-                >
+                <td colSpan={8} className="px-6 py-8 text-center text-muted">
                   No devices in the database yet.
                 </td>
               </tr>
@@ -150,8 +146,8 @@ export default function ClaimDeviceDatabasePage() {
         </table>
       </div>
 
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex items-center justify-between">
-        <div className="text-sm text-gray-600">
+      <div className={`${cardBg} border border-border rounded-xl p-4 shadow-sm flex items-center justify-between`}>
+        <div className={`text-sm ${cell}`}>
           Page {currentPage} of {totalPages}
         </div>
         <div className="flex items-center gap-2">
@@ -159,7 +155,7 @@ export default function ClaimDeviceDatabasePage() {
             type="button"
             onClick={() => setPage((prev) => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
-            className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-slate-900 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`rounded-lg border px-3 py-2 text-sm font-medium transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 ${controlBg}`}
           >
             Previous
           </button>
@@ -167,7 +163,7 @@ export default function ClaimDeviceDatabasePage() {
             type="button"
             onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-slate-900 transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className={`rounded-lg border px-3 py-2 text-sm font-medium transition hover:border-slate-300 disabled:cursor-not-allowed disabled:opacity-50 ${controlBg}`}
           >
             Next
           </button>

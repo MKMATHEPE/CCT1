@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import { useTheme } from "../auth/themeContext";
 import { writeAuditLog } from "../services/auditLogService";
 import {
   ensureApiAvailable,
@@ -66,6 +67,7 @@ type ClaimPrefillState = {
 
 export default function ClaimDeviceNewClaimPage() {
   const { user } = useAuth();
+  const theme = useTheme();
   const location = useLocation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const uploadProgressTimerRef = useRef<number | null>(null);
@@ -86,6 +88,27 @@ export default function ClaimDeviceNewClaimPage() {
   const claims = useClaims();
   const insurerName = user?.insurerName ?? "";
   const prefillState = (location.state as ClaimPrefillState | null) ?? null;
+
+  // Theme-derived tokens
+  const isLight = theme === "light";
+  const sectionBg   = isLight ? "#f5f9fd" : "#111827";
+  const sectionBorder = isLight ? "1px solid rgba(198,215,229,0.42)" : "1px solid rgba(255,255,255,0.07)";
+  const inputBg     = isLight ? "#f0f5fa" : "#0f172a";
+  const inputBorderColor = isLight ? "rgba(198,215,229,0.6)" : "rgba(255,255,255,0.08)";
+  const inputTextCls = isLight ? "text-gray-900" : "text-white";
+  const labelColor  = isLight ? "#8296a8" : "#64748b";
+  const hintColor   = isLight ? "#8296a8" : "#475569";
+  const subTextColor = isLight ? "#5b6f84" : "#475569";
+  const mutedTextColor = isLight ? "#8296a8" : "#334155";
+  const trackBg    = isLight ? "rgba(198,215,229,0.4)" : "rgba(255,255,255,0.08)";
+  const dragBorderIdle  = isLight ? "rgba(198,215,229,0.6)" : "rgba(255,255,255,0.1)";
+  const dragBgIdle      = isLight ? "rgba(198,215,229,0.1)" : "rgba(255,255,255,0.02)";
+  const dragBorderActive = "rgba(249,115,22,0.5)";
+  const dragBgActive     = "rgba(249,115,22,0.05)";
+
+  const inputStyle = { background: inputBg, borderColor: inputBorderColor, caretColor: "#f97316" };
+  const inputCls = `w-full rounded-xl border px-4 py-3 text-sm ${inputTextCls} outline-none transition`;
+  const labelCls = "block text-xs font-semibold uppercase tracking-[0.18em]";
 
   useEffect(() => {
     return () => {
@@ -421,8 +444,7 @@ export default function ClaimDeviceNewClaimPage() {
         const serial = mappedRow.serial;
         const importedDeviceName =
           mappedRow.deviceName || `${mappedRow.brand} ${mappedRow.model}`.trim();
-        const importedInsurer =
-          insurerName || mappedRow.insurer;
+        const importedInsurer = insurerName || mappedRow.insurer;
         const importedOutcome = normalizeImportedOutcome(mappedRow.outcome);
         const parsedDate = mappedRow.dateOfLoss
           ? parseDate(mappedRow.dateOfLoss)
@@ -649,35 +671,37 @@ export default function ClaimDeviceNewClaimPage() {
     setUploadStage("");
   }
 
-  const inputCls = "w-full rounded-xl border px-4 py-3 text-sm text-white outline-none transition";
-  const inputStyle = { background: "#0f172a", borderColor: "rgba(255,255,255,0.08)", caretColor: "#f97316" };
-  const labelCls = "block text-xs font-semibold uppercase tracking-[0.18em]";
-  const labelStyle = { color: "#64748b" };
-  const hintStyle = { color: "#475569" };
+  const hasFile = importFileName !== "Upload Excel file";
 
   return (
     <div>
       <section
         className="rounded-2xl p-6"
-        style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}
+        style={{ background: sectionBg, border: sectionBorder }}
       >
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: "#475569" }}>
+          <div
+            className="text-xs font-semibold uppercase tracking-[0.24em]"
+            style={{ color: subTextColor }}
+          >
             Claim Intake
           </div>
-          <h1 className="mt-3 text-2xl font-semibold text-white">
+          <h1
+            className="mt-3 text-2xl font-semibold"
+            style={{ color: isLight ? "#1e293b" : "#ffffff" }}
+          >
             Log a new claim
           </h1>
         </div>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-rose-500/25 bg-rose-500/8 px-4 py-3 text-sm text-rose-300">
+          <div className="mt-4 rounded-xl border border-rose-500/25 bg-rose-500/8 px-4 py-3 text-sm text-rose-400">
             {error}
           </div>
         )}
 
         {successMessage && (
-          <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-300">
+          <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-400">
             {successMessage}
           </div>
         )}
@@ -686,8 +710,8 @@ export default function ClaimDeviceNewClaimPage() {
         <div
           className="mt-6 rounded-xl border border-dashed p-5 transition"
           style={{
-            borderColor: isDraggingFile ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.1)",
-            background: isDraggingFile ? "rgba(249,115,22,0.05)" : "rgba(255,255,255,0.02)",
+            borderColor: isDraggingFile ? dragBorderActive : dragBorderIdle,
+            background: isDraggingFile ? dragBgActive : dragBgIdle,
           }}
           onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
           onDragEnter={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
@@ -701,18 +725,26 @@ export default function ClaimDeviceNewClaimPage() {
             handleSelectedImportFile(e.dataTransfer.files?.[0] ?? null);
           }}
         >
-          <div className="text-sm font-semibold text-white">Bulk Import Claims</div>
-          <p className="mt-2 text-sm" style={{ color: "#64748b" }}>
+          <div
+            className="text-sm font-semibold"
+            style={{ color: isLight ? "#1e293b" : "#ffffff" }}
+          >
+            Bulk Import Claims
+          </div>
+          <p className="mt-2 text-sm" style={{ color: labelColor }}>
             Drag and drop an Excel or CSV file here, or choose a file manually.
           </p>
 
           {(uploadProgress > 0 || uploadStage) && (
             <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "#64748b" }}>
+              <div
+                className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em]"
+                style={{ color: labelColor }}
+              >
                 <span>{uploadStage || "Uploading"}</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="h-2 overflow-hidden rounded-full" style={{ background: trackBg }}>
                 <div
                   className="h-full rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%`, background: "linear-gradient(90deg,#f97316,#ef4444)" }}
@@ -732,14 +764,14 @@ export default function ClaimDeviceNewClaimPage() {
             />
             <label
               htmlFor="excelUpload"
-              className="inline-flex cursor-pointer items-center rounded-xl border px-4 py-2.5 text-sm font-medium transition text-white"
+              className="inline-flex cursor-pointer items-center rounded-xl border px-4 py-2.5 text-sm font-medium transition"
               style={{
-                background: importFileName === "Upload Excel file" ? "rgba(255,255,255,0.05)" : "rgba(249,115,22,0.1)",
-                borderColor: importFileName === "Upload Excel file" ? "rgba(255,255,255,0.1)" : "rgba(249,115,22,0.3)",
-                color: importFileName === "Upload Excel file" ? "#94a3b8" : "#fb923c",
+                background: hasFile ? "rgba(249,115,22,0.1)" : (isLight ? "rgba(198,215,229,0.15)" : "rgba(255,255,255,0.05)"),
+                borderColor: hasFile ? "rgba(249,115,22,0.3)" : dragBorderIdle,
+                color: hasFile ? "#fb923c" : subTextColor,
               }}
             >
-              {importFileName === "Upload Excel file" ? "Upload Excel file" : importFileName}
+              {importFileName}
             </label>
 
             <button
@@ -753,13 +785,16 @@ export default function ClaimDeviceNewClaimPage() {
             </button>
           </div>
 
-          <p className="mt-3 text-xs" style={{ color: "#475569" }}>
+          <p className="mt-3 text-xs" style={{ color: hintColor }}>
             Upload multiple claims at once. Include at least one device identifier
             column per row: IMEI or Serial, plus Brand, Model, ClaimType, Amount, and DateOfLoss.
           </p>
         </div>
 
-        <p className="my-4 text-center text-xs tracking-[0.22em]" style={{ color: "#334155" }}>
+        <p
+          className="my-4 text-center text-xs tracking-[0.22em]"
+          style={{ color: mutedTextColor }}
+        >
           OR MANUALLY CAPTURE
         </p>
 
@@ -769,7 +804,7 @@ export default function ClaimDeviceNewClaimPage() {
           onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
         >
           <div className="space-y-2">
-            <label className={labelCls} style={labelStyle}>Device Name / Model</label>
+            <label className={labelCls} style={{ color: labelColor }}>Device Name / Model</label>
             <input
               value={deviceName}
               onChange={(e) => setDeviceName(e.target.value)}
@@ -780,7 +815,7 @@ export default function ClaimDeviceNewClaimPage() {
           </div>
 
           <div className="space-y-2">
-            <label className={labelCls} style={labelStyle}>IMEI Number</label>
+            <label className={labelCls} style={{ color: labelColor }}>IMEI Number</label>
             <input
               value={imeiNumber}
               onChange={(e) => setImeiNumber(e.target.value)}
@@ -788,11 +823,11 @@ export default function ClaimDeviceNewClaimPage() {
               className={inputCls}
               style={inputStyle}
             />
-            <div className="text-xs" style={hintStyle}>Enter IMEI or provide a serial number instead.</div>
+            <div className="text-xs" style={{ color: hintColor }}>Enter IMEI or provide a serial number instead.</div>
           </div>
 
           <div className="space-y-2">
-            <label className={labelCls} style={labelStyle}>Serial Number</label>
+            <label className={labelCls} style={{ color: labelColor }}>Serial Number</label>
             <input
               value={serialNumber}
               onChange={(e) => setSerialNumber(e.target.value)}
@@ -800,16 +835,16 @@ export default function ClaimDeviceNewClaimPage() {
               className={inputCls}
               style={inputStyle}
             />
-            <div className="text-xs" style={hintStyle}>At least one of IMEI or serial number is required.</div>
+            <div className="text-xs" style={{ color: hintColor }}>At least one of IMEI or serial number is required.</div>
           </div>
 
           <div className="space-y-2">
-            <label className={labelCls} style={labelStyle}>Claim Outcome</label>
+            <label className={labelCls} style={{ color: labelColor }}>Claim Outcome</label>
             <select
               value={claimOutcome}
               onChange={(e) => setClaimOutcome(e.target.value)}
               className={inputCls}
-              style={{ ...inputStyle, colorScheme: "dark" }}
+              style={{ ...inputStyle, colorScheme: isLight ? "light" : "dark" }}
             >
               <option value="">Select outcome</option>
               {outcomeOptions.map((o) => (
@@ -819,43 +854,43 @@ export default function ClaimDeviceNewClaimPage() {
           </div>
 
           <div className="space-y-2">
-            <label className={labelCls} style={labelStyle}>Date Of Loss</label>
+            <label className={labelCls} style={{ color: labelColor }}>Date Of Loss</label>
             <input
               type="date"
               value={dateOfLoss}
               onChange={(e) => setDateOfLoss(e.target.value)}
               className={inputCls}
-              style={{ ...inputStyle, colorScheme: "dark" }}
+              style={{ ...inputStyle, colorScheme: isLight ? "light" : "dark" }}
             />
           </div>
 
           <div className="space-y-2">
-            <label className={labelCls} style={labelStyle}>Claim Amount</label>
+            <label className={labelCls} style={{ color: labelColor }}>Claim Amount</label>
             <div
               className="flex items-center rounded-xl border px-4 py-3 text-sm transition"
               style={inputStyle}
             >
-              <span className="mr-3 font-semibold" style={{ color: "#475569" }}>R</span>
+              <span className="mr-3 font-semibold" style={{ color: subTextColor }}>R</span>
               <input
                 type="text"
                 inputMode="decimal"
                 value={paidOutValue}
                 onChange={(e) => handlePaidOutValueChange(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-transparent text-sm text-white outline-none"
+                className={`w-full bg-transparent text-sm ${inputTextCls} outline-none`}
                 style={{ caretColor: "#f97316" }}
               />
             </div>
-            <div className="text-xs" style={hintStyle}>Enter amount in South African Rand (ZAR).</div>
+            <div className="text-xs" style={{ color: hintColor }}>Enter amount in South African Rand (ZAR).</div>
           </div>
 
           <div className="space-y-2 lg:col-span-2">
-            <label className={labelCls} style={labelStyle}>Reason</label>
+            <label className={labelCls} style={{ color: labelColor }}>Reason</label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={4}
-              className="w-full resize-none rounded-xl border px-4 py-3 text-sm text-white outline-none transition"
+              className={`w-full resize-none rounded-xl border px-4 py-3 text-sm ${inputTextCls} outline-none transition`}
               style={inputStyle}
             />
           </div>
