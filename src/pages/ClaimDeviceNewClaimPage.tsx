@@ -649,74 +649,73 @@ export default function ClaimDeviceNewClaimPage() {
     setUploadStage("");
   }
 
+  const inputCls = "w-full rounded-xl border px-4 py-3 text-sm text-white outline-none transition";
+  const inputStyle = { background: "#0f172a", borderColor: "rgba(255,255,255,0.08)", caretColor: "#f97316" };
+  const labelCls = "block text-xs font-semibold uppercase tracking-[0.18em]";
+  const labelStyle = { color: "#64748b" };
+  const hintStyle = { color: "#475569" };
+
   return (
     <div>
-      <section className="rounded-2xl border border-border bg-white p-6 shadow-sm">
+      <section
+        className="rounded-2xl p-6"
+        style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.07)" }}
+      >
         <div>
-          <div className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.24em]" style={{ color: "#475569" }}>
             Claim Intake
           </div>
-          <h1 className="mt-3 text-2xl font-semibold text-slate-900">
+          <h1 className="mt-3 text-2xl font-semibold text-white">
             Log a new claim
           </h1>
         </div>
 
         {error && (
-          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="mt-4 rounded-xl border border-rose-500/25 bg-rose-500/8 px-4 py-3 text-sm text-rose-300">
             {error}
           </div>
         )}
 
         {successMessage && (
-          <div className="mt-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+          <div className="mt-4 rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-3 text-sm text-emerald-300">
             {successMessage}
           </div>
         )}
 
+        {/* Bulk import */}
         <div
-          className={`mt-6 rounded-xl border border-dashed p-5 transition ${
-            isDraggingFile
-              ? "border-blue-300 bg-blue-50"
-              : "border-slate-300 bg-slate-50"
-          }`}
-          onDragOver={(event) => {
-            event.preventDefault();
-            setIsDraggingFile(true);
+          className="mt-6 rounded-xl border border-dashed p-5 transition"
+          style={{
+            borderColor: isDraggingFile ? "rgba(249,115,22,0.5)" : "rgba(255,255,255,0.1)",
+            background: isDraggingFile ? "rgba(249,115,22,0.05)" : "rgba(255,255,255,0.02)",
           }}
-          onDragEnter={(event) => {
-            event.preventDefault();
-            setIsDraggingFile(true);
+          onDragOver={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+          onDragEnter={(e) => { e.preventDefault(); setIsDraggingFile(true); }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDraggingFile(false);
           }}
-          onDragLeave={(event) => {
-            event.preventDefault();
-            if (event.currentTarget.contains(event.relatedTarget as Node)) {
-              return;
-            }
+          onDrop={(e) => {
+            e.preventDefault();
             setIsDraggingFile(false);
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            setIsDraggingFile(false);
-            handleSelectedImportFile(event.dataTransfer.files?.[0] ?? null);
+            handleSelectedImportFile(e.dataTransfer.files?.[0] ?? null);
           }}
         >
-          <div className="text-sm font-semibold text-slate-900">
-            Bulk Import Claims
-          </div>
-          <p className="mt-2 text-sm text-slate-500">
+          <div className="text-sm font-semibold text-white">Bulk Import Claims</div>
+          <p className="mt-2 text-sm" style={{ color: "#64748b" }}>
             Drag and drop an Excel or CSV file here, or choose a file manually.
           </p>
 
           {(uploadProgress > 0 || uploadStage) && (
             <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+              <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: "#64748b" }}>
                 <span>{uploadStage || "Uploading"}</span>
                 <span>{uploadProgress}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+              <div className="h-2 overflow-hidden rounded-full" style={{ background: "rgba(255,255,255,0.08)" }}>
                 <div
-                  className="h-full rounded-full bg-slate-900 transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%`, background: "linear-gradient(90deg,#f97316,#ef4444)" }}
                 />
               </div>
             </div>
@@ -729,157 +728,135 @@ export default function ClaimDeviceNewClaimPage() {
               id="excelUpload"
               accept=".xlsx,.csv"
               className="hidden"
-              onChange={(event) => {
-                handleSelectedImportFile(event.target.files?.[0] ?? null);
-              }}
+              onChange={(e) => handleSelectedImportFile(e.target.files?.[0] ?? null)}
             />
-
             <label
               htmlFor="excelUpload"
-              className={`inline-flex cursor-pointer items-center rounded-xl border px-4 py-3 text-sm font-medium transition ${
-                importFileName === "Upload Excel file"
-                  ? "border-border bg-white text-slate-700 hover:border-slate-300"
-                  : "border-blue-200 bg-blue-50 text-blue-700"
-              }`}
+              className="inline-flex cursor-pointer items-center rounded-xl border px-4 py-2.5 text-sm font-medium transition text-white"
+              style={{
+                background: importFileName === "Upload Excel file" ? "rgba(255,255,255,0.05)" : "rgba(249,115,22,0.1)",
+                borderColor: importFileName === "Upload Excel file" ? "rgba(255,255,255,0.1)" : "rgba(249,115,22,0.3)",
+                color: importFileName === "Upload Excel file" ? "#94a3b8" : "#fb923c",
+              }}
             >
-              {importFileName === "Upload Excel file"
-                ? "Upload Excel file"
-                : importFileName}
+              {importFileName === "Upload Excel file" ? "Upload Excel file" : importFileName}
             </label>
 
             <button
               type="button"
               onClick={handleExcelUpload}
               disabled={isSubmitting}
-              className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300"
+              className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", boxShadow: "0 4px 16px rgba(239,68,68,0.25)" }}
             >
               {isSubmitting ? "Importing..." : "Import Claims"}
             </button>
-
           </div>
 
-          <p className="mt-3 text-xs text-slate-500">
+          <p className="mt-3 text-xs" style={{ color: "#475569" }}>
             Upload multiple claims at once. Include at least one device identifier
-            column per row: IMEI or Serial, plus Brand, Model, ClaimType, Amount,
-            and DateOfLoss.
+            column per row: IMEI or Serial, plus Brand, Model, ClaimType, Amount, and DateOfLoss.
           </p>
         </div>
 
-        <p className="my-4 text-center text-xs tracking-[0.22em] text-slate-400">
+        <p className="my-4 text-center text-xs tracking-[0.22em]" style={{ color: "#334155" }}>
           OR MANUALLY CAPTURE
         </p>
 
         <form
           id="claimForm"
           className="mt-2 grid gap-5 lg:grid-cols-2"
-          onSubmit={(event) => {
-            event.preventDefault();
-            handleSubmit();
-          }}
+          onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
         >
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Device Name / Model
-            </label>
+            <label className={labelCls} style={labelStyle}>Device Name / Model</label>
             <input
               value={deviceName}
-              onChange={(event) => setDeviceName(event.target.value)}
+              onChange={(e) => setDeviceName(e.target.value)}
               placeholder="Apple iPhone 13 Pro"
-              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              className={inputCls}
+              style={inputStyle}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              IMEI Number
-            </label>
+            <label className={labelCls} style={labelStyle}>IMEI Number</label>
             <input
               value={imeiNumber}
-              onChange={(event) => setImeiNumber(event.target.value)}
+              onChange={(e) => setImeiNumber(e.target.value)}
               placeholder="Enter IMEI if available"
-              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              className={inputCls}
+              style={inputStyle}
             />
-            <div className="text-xs text-slate-500">
-              Enter IMEI or provide a serial number instead.
-            </div>
+            <div className="text-xs" style={hintStyle}>Enter IMEI or provide a serial number instead.</div>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Serial Number
-            </label>
+            <label className={labelCls} style={labelStyle}>Serial Number</label>
             <input
               value={serialNumber}
-              onChange={(event) => setSerialNumber(event.target.value)}
+              onChange={(e) => setSerialNumber(e.target.value)}
               placeholder="Enter serial if IMEI is unavailable"
-              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              className={inputCls}
+              style={inputStyle}
             />
-            <div className="text-xs text-slate-500">
-              At least one of IMEI or serial number is required.
-            </div>
+            <div className="text-xs" style={hintStyle}>At least one of IMEI or serial number is required.</div>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Claim Outcome
-            </label>
+            <label className={labelCls} style={labelStyle}>Claim Outcome</label>
             <select
               value={claimOutcome}
-              onChange={(event) => setClaimOutcome(event.target.value)}
-              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) => setClaimOutcome(e.target.value)}
+              className={inputCls}
+              style={{ ...inputStyle, colorScheme: "dark" }}
             >
               <option value="">Select outcome</option>
-              {outcomeOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
+              {outcomeOptions.map((o) => (
+                <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Date Of Loss
-            </label>
+            <label className={labelCls} style={labelStyle}>Date Of Loss</label>
             <input
               type="date"
               value={dateOfLoss}
-              onChange={(event) => setDateOfLoss(event.target.value)}
-              className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              onChange={(e) => setDateOfLoss(e.target.value)}
+              className={inputCls}
+              style={{ ...inputStyle, colorScheme: "dark" }}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Claim Amount
-            </label>
-            <div className="flex items-center rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 transition focus-within:border-slate-500 focus-within:ring-2 focus-within:ring-slate-200">
-              <span className="mr-3 font-semibold text-slate-500">R</span>
+            <label className={labelCls} style={labelStyle}>Claim Amount</label>
+            <div
+              className="flex items-center rounded-xl border px-4 py-3 text-sm transition"
+              style={inputStyle}
+            >
+              <span className="mr-3 font-semibold" style={{ color: "#475569" }}>R</span>
               <input
                 type="text"
                 inputMode="decimal"
                 value={paidOutValue}
-                onChange={(event) =>
-                  handlePaidOutValueChange(event.target.value)
-                }
+                onChange={(e) => handlePaidOutValueChange(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-transparent text-sm text-slate-900 outline-none"
+                className="w-full bg-transparent text-sm text-white outline-none"
+                style={{ caretColor: "#f97316" }}
               />
             </div>
-            <div className="text-xs text-slate-500">
-              Enter amount in South African Rand (ZAR).
-            </div>
+            <div className="text-xs" style={hintStyle}>Enter amount in South African Rand (ZAR).</div>
           </div>
 
           <div className="space-y-2 lg:col-span-2">
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Reason
-            </label>
+            <label className={labelCls} style={labelStyle}>Reason</label>
             <textarea
               value={reason}
-              onChange={(event) => setReason(event.target.value)}
+              onChange={(e) => setReason(e.target.value)}
               rows={4}
-              className="w-full resize-none rounded-xl border border-border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+              className="w-full resize-none rounded-xl border px-4 py-3 text-sm text-white outline-none transition"
+              style={inputStyle}
             />
           </div>
         </form>
@@ -889,7 +866,8 @@ export default function ClaimDeviceNewClaimPage() {
             type="submit"
             form="claimForm"
             disabled={isSubmitting}
-            className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-sm transition hover:border-slate-300 disabled:opacity-50"
+            className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", boxShadow: "0 4px 16px rgba(239,68,68,0.25)" }}
           >
             {isSubmitting ? "Submitting..." : "Log Claim"}
           </button>
