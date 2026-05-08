@@ -44,9 +44,9 @@ export default function SettingsPage({ view }: Props) {
     ? `${user.name.toLowerCase().replace(/\s+/g, ".")}@abcinsurance.com`
     : "unknown@abcinsurance.com";
 
-  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
-  const heading = theme === "light" ? "text-gray-900" : "text-white";
-  const body = theme === "light" ? "text-gray-700" : "text-slate-300";
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-[#111827]";
+  const heading = theme === "light" ? "text-[#1e293b]" : "text-white";
+  const body = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
   // CSS global rules handle input bg/text/border for both themes — no bg-white class (it gets !important-overridden to dark)
   const inputCls = "mt-2 w-full rounded-xl border border-border px-4 py-3 text-sm outline-none transition";
   const cardRowCls = theme === "light"
@@ -236,15 +236,15 @@ export default function SettingsPage({ view }: Props) {
     }
   }
 
-  const heroText = theme === "light" ? "text-slate-700" : "text-white";
-  const heroSub  = theme === "light" ? "text-slate-500" : "text-slate-300";
+  const heroText = theme === "light" ? "text-[#1e293b]" : "text-white";
+  const heroSub  = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
 
   return (
     <div className="space-y-4">
-      <section className={`relative overflow-hidden rounded-[28px] border border-white/10 p-6 shadow-[0_28px_60px_rgba(2,6,23,0.42)] ${
+      <section className={`relative overflow-hidden rounded-[28px] p-6 ${
         theme === "light"
-          ? "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#dde6f0_0%,#cdd8e5_100%)]"
-          : "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]"
+          ? "bg-[#f5f9fd] border border-[rgba(198,215,229,0.42)] shadow-[0_2px_8px_rgba(130,168,200,0.10),_0_8px_24px_rgba(130,168,200,0.08)]"
+          : "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)] border border-white/10 shadow-[0_28px_60px_rgba(2,6,23,0.42)]"
       }`}>
         {/* World map watermark */}
         <svg
@@ -252,6 +252,7 @@ export default function SettingsPage({ view }: Props) {
           preserveAspectRatio="xMidYMid slice"
           aria-hidden="true"
           className="absolute inset-0 w-full h-full pointer-events-none select-none"
+          style={{ opacity: theme === "light" ? 0 : 1 }}
         >
           <path d="M 32,42 L 52,34 L 70,32 L 88,34 L 104,40 L 116,50 L 110,62 L 97,68 L 88,78 L 96,88 L 108,96 L 122,96 L 138,92 L 152,88 L 164,88 L 174,92 L 182,100 L 188,112 L 192,126 L 198,138 L 208,148 L 220,154 L 234,156 L 248,157 L 262,156 L 274,157 L 284,164 L 292,174 L 298,185 L 296,198 L 286,208 L 272,216 L 258,222 L 248,232 L 238,242 L 226,250 L 214,258 L 203,256 L 195,244 L 192,232 L 186,222 L 176,215 L 164,212 L 152,217 L 142,226 L 130,232 L 116,226 L 102,212 L 90,196 L 78,180 L 66,163 L 56,146 L 48,130 L 41,114 L 36,98 L 30,82 L 28,66 L 30,52 Z" fill="white" opacity="0.04"/>
           <path d="M 270,222 L 284,218 L 298,216 L 312,218 L 324,224 L 334,232 L 342,244 L 348,258 L 352,274 L 356,292 L 360,312 L 363,334 L 364,357 L 362,380 L 356,404 L 347,426 L 334,446 L 318,463 L 300,474 L 282,478 L 264,474 L 248,463 L 236,449 L 228,432 L 223,414 L 221,395 L 224,375 L 228,355 L 228,334 L 225,312 L 218,291 L 212,272 L 211,254 L 217,239 L 228,228 L 242,222 L 256,220 Z" fill="white" opacity="0.04"/>

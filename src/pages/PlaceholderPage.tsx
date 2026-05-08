@@ -14,8 +14,8 @@ export default function PlaceholderPage({
   badge,
 }: Props) {
   const theme = useTheme();
-  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
-  const heading = theme === "light" ? "text-gray-900" : "text-white";
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-[#111827]";
+  const heading = theme === "light" ? "text-[#1e293b]" : "text-white";
   return (
     <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
       <div className="flex items-center gap-3">
@@ -34,7 +34,7 @@ export default function PlaceholderPage({
         </p>
       )}
       {body && (
-        <div className={`mt-4 text-sm ${theme === "light" ? "text-gray-600" : "text-slate-300"}`}>
+        <div className={`mt-4 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-300"}`}>
           {body}
         </div>
       )}

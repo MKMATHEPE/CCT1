@@ -3,9 +3,9 @@ import { useTheme } from "../auth/themeContext";
 
 export default function AccessDenied() {
   const theme = useTheme();
-  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
-  const heading = theme === "light" ? "text-gray-900" : "text-white";
-  const linkText = theme === "light" ? "text-gray-700" : "text-slate-300";
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-[#111827]";
+  const heading = theme === "light" ? "text-[#1e293b]" : "text-white";
+  const linkText = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
   return (
     <div className={`${cardBg} border border-border rounded-xl p-6 shadow-sm`}>
       <h2 className={`text-xl font-semibold ${heading}`}>

@@ -135,12 +135,12 @@ body {
 .cct-theme.cct-theme-light {
   --cct-surface: rgba(245, 249, 253, 0.82);
   --cct-surface-strong: rgba(255, 255, 255, 0.94);
-  --cct-border: rgba(190, 210, 228, 0.5);
-  --cct-border-soft: rgba(190, 210, 228, 0.28);
+  --cct-border: rgba(198, 215, 229, 0.42);
+  --cct-border-soft: rgba(198, 215, 229, 0.22);
   --cct-glass-highlight: rgba(255, 255, 255, 0.72);
-  --cct-text: #4e6478;
-  --cct-text-muted: #7b93a8;
-  --cct-text-soft: #6785a0;
+  --cct-text: #1e293b;
+  --cct-text-muted: #8296a8;
+  --cct-text-soft: #5b6f84;
   --cct-accent: #ea580c;
   --cct-accent-soft: rgba(249, 115, 22, 0.08);
   --cct-shell: #e8eef5;
@@ -161,8 +161,12 @@ body {
   z-index: 1;
 }
 
+.cct-theme.cct-theme-light {
+  background-color: #e8eef5;
+}
+
 .cct-theme.cct-theme-light .bg-bg {
-  background: #e8eef5 !important;
+  background: transparent !important;
 }
 
 .cct-theme .bg-white,

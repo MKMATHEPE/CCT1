@@ -73,13 +73,15 @@ function Panel({
   children: ReactNode;
   className?: string;
 }) {
+  const isLight = useTheme() === "light";
+  const border = isLight ? "border-[rgba(198,215,229,0.42)]" : "border-white/10";
   return (
     <section
-      className={`min-w-0 rounded-2xl border border-white/10 ${useTheme() === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] ${className}`.trim()}
+      className={`min-w-0 rounded-2xl border ${border} ${isLight ? "bg-[#f5f9fd]" : "bg-[#111827]"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] ${className}`.trim()}
     >
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+        <h3 className={`text-lg font-semibold ${isLight ? "text-[#1e293b]" : "text-white"}`}>{title}</h3>
+        {subtitle && <p className={`mt-1 text-sm ${isLight ? "text-[#5b6f84]" : "text-slate-400"}`}>{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -87,12 +89,14 @@ function Panel({
 }
 
 function MetricPanel({ card }: { card: MetricCard }) {
+  const isLight = useTheme() === "light";
+  const border = isLight ? "border-[rgba(198,215,229,0.42)]" : "border-white/10";
   return (
-    <div className={`rounded-2xl border border-white/10 ${useTheme() === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)]`}>
+    <div className={`rounded-2xl border ${border} ${isLight ? "bg-[#f5f9fd]" : "bg-[#111827]"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)]`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-400">{card.label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <p className={`text-sm font-medium ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.label}</p>
+          <p className={`mt-3 text-3xl font-semibold tracking-tight ${isLight ? "text-[#1e293b]" : "text-white"}`}>
             {card.value}
           </p>
         </div>
@@ -108,13 +112,14 @@ function MetricPanel({ card }: { card: MetricCard }) {
           className="h-2.5 w-2.5 rounded-full"
           style={{ backgroundColor: card.accent }}
         />
-        <span className="text-xs text-slate-400">{card.note}</span>
+        <span className={`text-xs ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.note}</span>
       </div>
     </div>
   );
 }
 
 export default function AdminDashboardInsightsPage() {
+  const theme = useTheme();
   const [state, setState] = useState<InsightsState>({
     clients: [],
     isLoading: true,
@@ -291,17 +296,21 @@ export default function AdminDashboardInsightsPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-12">
-      <section className={`xl:col-span-12 rounded-[28px] border border-white/10 p-6 shadow-[0_28px_60px_rgba(2,6,23,0.42)] ${useTheme() === "light" ? "bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.08),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.10),_transparent_30%),linear-gradient(180deg,#dde6f0_0%,#cdd8e5_100%)]" : "bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.12),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]"}`}>
+      <section className={`xl:col-span-12 rounded-[28px] p-6 ${
+        theme === "light"
+          ? "bg-[#f5f9fd] border border-[rgba(198,215,229,0.42)] shadow-[0_2px_8px_rgba(130,168,200,0.10),_0_8px_24px_rgba(130,168,200,0.08)]"
+          : "bg-[radial-gradient(circle_at_top_left,_rgba(34,197,94,0.12),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)] border border-white/10 shadow-[0_28px_60px_rgba(2,6,23,0.42)]"
+      }`}>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <h1 className="text-4xl font-semibold tracking-tight text-white">
+            <h1 className={`text-4xl font-semibold tracking-tight ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
               Insights View
             </h1>
-            <p className="mt-2 text-base text-slate-300">
+            <p className={`mt-2 text-base ${theme === "light" ? "text-[#5b6f84]" : "text-slate-300"}`}>
               Cross-client comparisons, rankings, and performance views from the dashboard layer.
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-slate-950/55 px-4 py-3 text-sm text-slate-300">
+          <div className={`rounded-2xl border px-4 py-3 text-sm ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8] text-[#5b6f84]" : "border-white/10 bg-slate-950/55 text-slate-300"}`}>
             <div>Total Claims: {formatNumber(totals.claims)}</div>
             <div>Total Rejections: {formatNumber(totals.rejected)}</div>
           </div>
@@ -324,10 +333,10 @@ export default function AdminDashboardInsightsPage() {
 
       <div className="xl:col-span-4 space-y-4">
         <Panel title="Top Search Client" subtitle="Highest search volume">
-          <div className="text-2xl font-semibold text-white">
+          <div className={`text-2xl font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
             {topSearchClient?.insurerName ?? "No data"}
           </div>
-          <div className="mt-2 text-sm text-slate-400">
+          <div className={`mt-2 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
             {topSearchClient
               ? `${formatNumber(topSearchClient.totalSearches)} searches`
               : "No client search activity yet."}
@@ -335,10 +344,10 @@ export default function AdminDashboardInsightsPage() {
         </Panel>
 
         <Panel title="Top Savings Client" subtitle="Highest estimated claim value">
-          <div className="text-2xl font-semibold text-white">
+          <div className={`text-2xl font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
             {topSavingsClient?.insurerName ?? "No data"}
           </div>
-          <div className="mt-2 text-sm text-slate-400">
+          <div className={`mt-2 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
             {topSavingsClient
               ? `${formatCurrency(topSavingsClient.claimValue)} prevented value`
               : "No client savings yet."}
@@ -346,10 +355,10 @@ export default function AdminDashboardInsightsPage() {
         </Panel>
 
         <Panel title="Highest Rejection Rate" subtitle="Most rejected matches">
-          <div className="text-2xl font-semibold text-white">
+          <div className={`text-2xl font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
             {mostRejectedClient?.insurerName ?? "No data"}
           </div>
-          <div className="mt-2 text-sm text-slate-400">
+          <div className={`mt-2 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
             {mostRejectedClient
               ? `${formatNumber(mostRejectedClient.rejectedClaims)} rejected claims`
               : "No rejections recorded yet."}
@@ -439,34 +448,38 @@ export default function AdminDashboardInsightsPage() {
               {rankingRows.map((client, index) => (
                 <div
                   key={client.userId}
-                  className="flex items-center justify-between gap-4 rounded-2xl border border-white/6 bg-slate-950/55 px-4 py-4"
+                  className={`flex items-center justify-between gap-4 rounded-2xl border px-4 py-4 ${
+                    theme === "light"
+                      ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8]"
+                      : "border-white/6 bg-slate-950/55"
+                  }`}
                 >
                   <div className="min-w-0">
-                    <div className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                    <div className={`text-xs uppercase tracking-[0.18em] ${theme === "light" ? "text-[#8296a8]" : "text-slate-500"}`}>
                       Rank {index + 1}
                     </div>
-                    <div className="mt-1 font-semibold text-white">
+                    <div className={`mt-1 font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
                       {client.insurerName}
                     </div>
-                    <div className="mt-1 text-sm text-slate-400">
+                    <div className={`mt-1 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
                       {client.username}
                     </div>
                   </div>
                   <div className="grid min-w-[260px] grid-cols-3 gap-3 text-right text-sm">
                     <div>
-                      <div className="text-slate-500">Searches</div>
-                      <div className="mt-1 font-semibold text-slate-100">
+                      <div className={theme === "light" ? "text-[#8296a8]" : "text-slate-500"}>Searches</div>
+                      <div className={`mt-1 font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-slate-100"}`}>
                         {formatNumber(client.totalSearches)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-slate-500">Rejected</div>
-                      <div className="mt-1 font-semibold text-slate-100">
+                      <div className={theme === "light" ? "text-[#8296a8]" : "text-slate-500"}>Rejected</div>
+                      <div className={`mt-1 font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-slate-100"}`}>
                         {formatNumber(client.rejectedClaims)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-slate-500">Value</div>
+                      <div className={theme === "light" ? "text-[#8296a8]" : "text-slate-500"}>Value</div>
                       <div className="mt-1 font-semibold text-emerald-400">
                         {formatCurrency(client.claimValue)}
                       </div>
@@ -482,24 +495,24 @@ export default function AdminDashboardInsightsPage() {
       <div className="xl:col-span-5">
         <Panel title="Signals" subtitle="Quick portfolio-level readout">
           <div className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+            <div className={`rounded-2xl border p-4 ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8]" : "border-white/10 bg-slate-950/40"}`}>
               <div className="flex items-center gap-3">
                 <FontAwesomeIcon icon={faArrowTrendUp} className="h-4 w-4 text-blue-400" />
                 <div>
-                  <div className="font-semibold text-white">Most active portfolio</div>
-                  <div className="text-sm text-slate-400">
+                  <div className={`font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>Most active portfolio</div>
+                  <div className={`text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
                     {topSearchClient?.insurerName ?? "No client activity yet"}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+            <div className={`rounded-2xl border p-4 ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8]" : "border-white/10 bg-slate-950/40"}`}>
               <div className="flex items-center gap-3">
                 <FontAwesomeIcon icon={faShieldHalved} className="h-4 w-4 text-emerald-400" />
                 <div>
-                  <div className="font-semibold text-white">Highest prevented value</div>
-                  <div className="text-sm text-slate-400">
+                  <div className={`font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>Highest prevented value</div>
+                  <div className={`text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
                     {topSavingsClient
                       ? `${topSavingsClient.insurerName} at ${formatCurrency(topSavingsClient.claimValue)}`
                       : "No savings recorded yet"}
@@ -508,12 +521,12 @@ export default function AdminDashboardInsightsPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+            <div className={`rounded-2xl border p-4 ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8]" : "border-white/10 bg-slate-950/40"}`}>
               <div className="flex items-center gap-3">
                 <FontAwesomeIcon icon={faTriangleExclamation} className="h-4 w-4 text-red-400" />
                 <div>
-                  <div className="font-semibold text-white">Most rejected claims</div>
-                  <div className="text-sm text-slate-400">
+                  <div className={`font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>Most rejected claims</div>
+                  <div className={`text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
                     {mostRejectedClient
                       ? `${mostRejectedClient.insurerName} with ${formatNumber(mostRejectedClient.rejectedClaims)}`
                       : "No rejected claims recorded yet"}

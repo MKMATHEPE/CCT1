@@ -31,5 +31,20 @@
     "actor": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
     "actorRole": "client",
     "context": "Search by IMEI or Serial Number"
+  },
+  {
+    "id": "7626eea0-e8e1-488f-a1fa-1acbd4062c68",
+    "timestampUtc": "2026-05-07T23:18:28.786Z",
+    "action": "LOGIN",
+    "target": "user-koki",
+    "outcome": "SUCCESS",
+    "actor": "user-koki",
+    "actorName": "Koki",
+    "actorRole": "admin",
+    "insurerName": "KokInsure",
+    "context": "User login",
+    "details": {
+      "role": "admin"
+    }
   }
 ]

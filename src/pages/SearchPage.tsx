@@ -49,9 +49,9 @@ export default function SearchPage({ mode }: Props) {
   const { user } = useAuth();
   const { claims, preventedClaimEvents } = useDeviceData();
 
-  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
-  const heading = theme === "light" ? "text-gray-900" : "text-white";
-  const body = theme === "light" ? "text-gray-600" : "text-slate-300";
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-[#111827]";
+  const heading = theme === "light" ? "text-[#1e293b]" : "text-white";
+  const body = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
   const muted = theme === "light" ? "text-gray-500" : "text-slate-400";
   const divider = theme === "light" ? "border-gray-200" : "border-white/10";
   const claimCard = theme === "light" ? "border border-gray-200 rounded-lg p-4 bg-gray-50" : "border border-white/10 rounded-lg p-4 bg-slate-800/50";

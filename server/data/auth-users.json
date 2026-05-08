@@ -54,8 +54,15 @@
       "token": "e04b155159dbcdccace453c3600c97472f4619c4ca9f48d7deaffa983e4cc76d",
       "userId": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
       "createdAt": "2026-05-07T14:48:07.890Z",
-      "lastSeenAt": "2026-05-07T20:17:54.560Z",
+      "lastSeenAt": "2026-05-07T23:24:57.329Z",
       "expiresAt": "2026-05-08T02:48:07.890Z"
+    },
+    {
+      "token": "12761f0dcfcc59deb5e8968ddebd67e09e90963765f95d57ce9aa5df135320da",
+      "userId": "user-koki",
+      "createdAt": "2026-05-07T23:18:28.777Z",
+      "lastSeenAt": "2026-05-08T00:24:15.574Z",
+      "expiresAt": "2026-05-08T11:18:28.777Z"
     }
   ]
 }

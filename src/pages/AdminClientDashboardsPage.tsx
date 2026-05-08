@@ -58,13 +58,14 @@ function statusTone(status: string) {
 }
 
 function MetricPanel({ card }: { card: MetricCard }) {
-  const theme = useTheme();
+  const isLight = useTheme() === "light";
+  const border = isLight ? "border-[rgba(198,215,229,0.42)]" : "border-white/10";
   return (
-    <div className={`rounded-2xl border border-white/10 ${theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)]`}>
+    <div className={`rounded-2xl border ${border} ${isLight ? "bg-[#f5f9fd]" : "bg-[#111827]"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)]`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-400">{card.label}</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
+          <p className={`text-sm font-medium ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.label}</p>
+          <p className={`mt-3 text-3xl font-semibold tracking-tight ${isLight ? "text-[#1e293b]" : "text-white"}`}>
             {card.value}
           </p>
         </div>
@@ -80,7 +81,7 @@ function MetricPanel({ card }: { card: MetricCard }) {
           className="h-2.5 w-2.5 rounded-full"
           style={{ backgroundColor: card.accent }}
         />
-        <span className="text-xs text-slate-400">{card.note}</span>
+        <span className={`text-xs ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.note}</span>
       </div>
     </div>
   );
@@ -97,13 +98,15 @@ function Panel({
   children: React.ReactNode;
   className?: string;
 }) {
+  const isLight = useTheme() === "light";
+  const border = isLight ? "border-[rgba(198,215,229,0.42)]" : "border-white/10";
   return (
     <section
-      className={`min-w-0 rounded-2xl border border-white/10 ${useTheme() === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] ${className}`.trim()}
+      className={`min-w-0 rounded-2xl border ${border} ${isLight ? "bg-[#f5f9fd]" : "bg-[#111827]"} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] ${className}`.trim()}
     >
       <div className="mb-4">
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+        <h3 className={`text-lg font-semibold ${isLight ? "text-[#1e293b]" : "text-white"}`}>{title}</h3>
+        {subtitle && <p className={`mt-1 text-sm ${isLight ? "text-[#5b6f84]" : "text-slate-400"}`}>{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -111,6 +114,7 @@ function Panel({
 }
 
 export default function AdminClientDashboardsPage() {
+  const theme = useTheme();
   const [feedback] = useState<FeedbackState>(null);
   const [clients, setClients] = useState<ClientUserRecord[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
@@ -178,17 +182,21 @@ export default function AdminClientDashboardsPage() {
 
   return (
     <div className="grid gap-6 xl:grid-cols-12">
-      <section className={`xl:col-span-12 rounded-[28px] border border-white/10 p-6 shadow-[0_28px_60px_rgba(2,6,23,0.42)] ${useTheme() === "light" ? "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.12),_transparent_30%),linear-gradient(180deg,#dde6f0_0%,#cdd8e5_100%)]" : "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)]"}`}>
+      <section className={`xl:col-span-12 rounded-[28px] p-6 ${
+        theme === "light"
+          ? "bg-[#f5f9fd] border border-[rgba(198,215,229,0.42)] shadow-[0_2px_8px_rgba(130,168,200,0.10),_0_8px_24px_rgba(130,168,200,0.08)]"
+          : "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)] border border-white/10 shadow-[0_28px_60px_rgba(2,6,23,0.42)]"
+      }`}>
         <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
           <div>
-            <h1 className="text-4xl font-semibold tracking-tight text-white">
+            <h1 className={`text-4xl font-semibold tracking-tight ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
               Client Dashboards
             </h1>
-            <p className="mt-2 text-base text-slate-300">
+            <p className={`mt-2 text-base ${theme === "light" ? "text-[#5b6f84]" : "text-slate-300"}`}>
               Inspect client-specific dashboard data and manage client accounts from one view.
             </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-slate-950/55 px-4 py-3 text-sm text-slate-300">
+          <div className={`rounded-2xl border px-4 py-3 text-sm ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8] text-[#5b6f84]" : "border-white/10 bg-slate-950/55 text-slate-300"}`}>
             <div>Available clients: {formatNumber(clients.length)}</div>
             <div>Selected: {selectedClient?.username ?? "None"}</div>
           </div>
@@ -215,7 +223,7 @@ export default function AdminClientDashboardsPage() {
         >
           <div className="space-y-3">
             {clients.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-6 text-sm text-slate-400">
+              <div className={`rounded-2xl border px-4 py-6 text-sm ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8] text-[#8296a8]" : "border-white/10 bg-slate-950/40 text-slate-400"}`}>
                 No client users are available yet.
               </div>
             ) : (
@@ -231,15 +239,17 @@ export default function AdminClientDashboardsPage() {
                     className={`w-full rounded-2xl border px-4 py-4 text-left transition ${
                       active
                         ? "border-blue-400/40 bg-blue-500/10"
-                        : "border-white/10 bg-slate-950/40 hover:border-white/20 hover:bg-white/5"
+                        : theme === "light"
+                          ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8] hover:bg-[#e0ecf6]"
+                          : "border-white/10 bg-slate-950/40 hover:border-white/20 hover:bg-white/5"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="font-semibold text-slate-100">
+                        <div className={`font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-slate-100"}`}>
                           {entry.insurerName}
                         </div>
-                        <div className="mt-1 text-sm text-slate-400">
+                        <div className={`mt-1 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
                           {entry.username}
                         </div>
                       </div>
@@ -273,9 +283,9 @@ export default function AdminClientDashboardsPage() {
               </div>
 
               <div className="grid gap-4">
-                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-                  <div className="text-sm font-semibold text-white">Activity Summary</div>
-                  <div className="mt-4 space-y-2 text-sm text-slate-300">
+                <div className={`rounded-2xl border p-4 ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8]" : "border-white/10 bg-slate-950/40"}`}>
+                  <div className={`text-sm font-semibold ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>Activity Summary</div>
+                  <div className={`mt-4 space-y-2 text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-300"}`}>
                     <div>Claims logged: {formatNumber(dashboard.stats?.totalClaims ?? 0)}</div>
                     <div>Searches logged: {formatNumber(dashboard.stats?.totalSearches ?? 0)}</div>
                     <div>Recent items: {formatNumber(dashboard.stats?.recentActivity.length ?? 0)}</div>

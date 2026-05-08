@@ -58,9 +58,9 @@ export default function ClaimDeviceDatabasePage() {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const pagedRows = rows.slice(startIndex, startIndex + rowsPerPage);
 
-  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
-  const heading = theme === "light" ? "text-gray-900" : "text-white";
-  const cell = theme === "light" ? "text-gray-600" : "text-slate-300";
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-[#111827]";
+  const heading = theme === "light" ? "text-[#1e293b]" : "text-white";
+  const cell = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
   const cellMuted = theme === "light" ? "text-gray-500" : "text-slate-400";
   const tableHead = theme === "light" ? "bg-[#dde6f0]/60 text-gray-600" : "bg-slate-800/60 text-slate-400";
   const controlBg = theme === "light" ? "bg-[#eaf1f8] text-slate-600 border-border" : "bg-slate-950 text-white border-white/10";

@@ -29,11 +29,11 @@ export default function InsightsPage({ view }: Props) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
 
-  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-slate-900/90";
-  const heading = theme === "light" ? "text-gray-900" : "text-white";
-  const body = theme === "light" ? "text-gray-700" : "text-slate-300";
+  const cardBg = theme === "light" ? "bg-[#f5f9fd]" : "bg-[#111827]";
+  const heading = theme === "light" ? "text-[#1e293b]" : "text-white";
+  const body = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
   const tableHead = theme === "light" ? "bg-[#dde6f0]/60 text-gray-600" : "bg-slate-800/60 text-slate-400";
-  const tableCell = theme === "light" ? "text-gray-600" : "text-slate-300";
+  const tableCell = theme === "light" ? "text-[#5b6f84]" : "text-slate-300";
 
   return (
     <div className="space-y-4">
