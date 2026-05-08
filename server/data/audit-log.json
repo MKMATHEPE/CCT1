@@ -46,5 +46,20 @@
     "details": {
       "role": "admin"
     }
+  },
+  {
+    "id": "8ec4b247-d1bb-4c64-aa3a-bd7568c33265",
+    "timestampUtc": "2026-05-08T18:43:13.186Z",
+    "action": "LOGIN",
+    "target": "user-koki",
+    "outcome": "SUCCESS",
+    "actor": "user-koki",
+    "actorName": "Koki",
+    "actorRole": "admin",
+    "insurerName": "KokInsure",
+    "context": "User login",
+    "details": {
+      "role": "admin"
+    }
   }
 ]

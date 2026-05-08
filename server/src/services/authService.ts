@@ -30,6 +30,13 @@ import type { AuthUserRow } from "../db/authStore.ts";
 
 const SESSION_TTL_HOURS = 12;
 
+function hasSupabaseCreds(): boolean {
+  return !!(
+    env.supabaseUrl.trim() &&
+    (env.supabaseServiceRoleKey || env.supabaseAnonKey).trim()
+  );
+}
+
 type CreateClientUserInput = {
   insurerName: string;
   username: string;
@@ -415,28 +422,35 @@ export async function createClientUser(input: CreateClientUserInput) {
     return toPublicClientUser(user);
   }
 
-  return mutateAuthDatabase((db) => {
-    if (db.users.some((user) => user.username === normalized.username)) {
+  const timestamp = new Date().toISOString();
+  const newClientUser: AuthUser = {
+    id: makeUserId(normalized.username),
+    name: normalized.username,
+    username: normalized.username,
+    role: "client",
+    insurerId: makeInsurerId(normalized.insurerName),
+    insurerName: normalized.insurerName,
+    builtIn: false,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    passwordHash: hashPassword(normalized.password),
+  };
+
+  const result = await mutateAuthDatabase((db) => {
+    if (db.users.some((u) => u.username === newClientUser.username)) {
       throw new HttpError(409, "That username already exists.");
     }
-
-    const timestamp = new Date().toISOString();
-    const user: AuthUser = {
-      id: makeUserId(normalized.username),
-      name: normalized.username,
-      username: normalized.username,
-      role: "client",
-      insurerId: makeInsurerId(normalized.insurerName),
-      insurerName: normalized.insurerName,
-      builtIn: false,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      passwordHash: hashPassword(normalized.password),
-    };
-
-    db.users.push(user);
-    return toPublicClientUser(user);
+    db.users.push(newClientUser);
+    return toPublicClientUser(newClientUser);
   });
+
+  if (hasSupabaseCreds()) {
+    insertUser(newClientUser).catch((err) =>
+      logger.warn("Supabase user mirror failed (create client):", err)
+    );
+  }
+
+  return result;
 }
 
 export async function createAdminUser(input: CreateAdminUserInput) {
@@ -465,28 +479,35 @@ export async function createAdminUser(input: CreateAdminUserInput) {
     return toPublicUser(user);
   }
 
-  return mutateAuthDatabase((db) => {
-    if (db.users.some((user) => user.username === normalized.username)) {
+  const timestamp = new Date().toISOString();
+  const newAdminUser: AuthUser = {
+    id: makeUserId(normalized.username),
+    name: normalized.name,
+    username: normalized.username,
+    role: "admin",
+    insurerId: makeInsurerId(normalized.insurerName),
+    insurerName: normalized.insurerName,
+    builtIn: false,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+    passwordHash: hashPassword(normalized.password),
+  };
+
+  const result = await mutateAuthDatabase((db) => {
+    if (db.users.some((u) => u.username === newAdminUser.username)) {
       throw new HttpError(409, "That username already exists.");
     }
-
-    const timestamp = new Date().toISOString();
-    const user: AuthUser = {
-      id: makeUserId(normalized.username),
-      name: normalized.name,
-      username: normalized.username,
-      role: "admin",
-      insurerId: makeInsurerId(normalized.insurerName),
-      insurerName: normalized.insurerName,
-      builtIn: false,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-      passwordHash: hashPassword(normalized.password),
-    };
-
-    db.users.push(user);
-    return toPublicUser(user);
+    db.users.push(newAdminUser);
+    return toPublicUser(newAdminUser);
   });
+
+  if (hasSupabaseCreds()) {
+    insertUser(newAdminUser).catch((err) =>
+      logger.warn("Supabase user mirror failed (create admin):", err)
+    );
+  }
+
+  return result;
 }
 
 export async function updateClientUser(userId: string, input: UpdateClientUserInput) {
@@ -531,37 +552,51 @@ export async function updateClientUser(userId: string, input: UpdateClientUserIn
     });
   }
 
-  return mutateAuthDatabase((db) => {
+  const nextUserId = makeUserId(normalized.username);
+  const passwordHash = hashPassword(normalized.password);
+  const updatedAt = new Date().toISOString();
+
+  const result = await mutateAuthDatabase((db) => {
     const user = db.users.find((entry) => entry.id === userId);
     if (!user || user.role !== "client") {
       throw new HttpError(404, "Client user not found.");
     }
-
     if (user.builtIn) {
       throw new HttpError(403, "Built-in client users cannot be edited.");
     }
-
-    if (
-      db.users.some(
-        (entry) => entry.username === normalized.username && entry.id !== userId
-      )
-    ) {
+    if (db.users.some((entry) => entry.username === normalized.username && entry.id !== userId)) {
       throw new HttpError(409, "That username already exists.");
     }
 
-    const nextUserId = makeUserId(normalized.username);
     user.id = nextUserId;
     user.name = normalized.username;
     user.username = normalized.username;
     user.insurerId = makeInsurerId(normalized.insurerName);
     user.insurerName = normalized.insurerName;
-    user.passwordHash = hashPassword(normalized.password);
-    user.updatedAt = new Date().toISOString();
+    user.passwordHash = passwordHash;
+    user.updatedAt = updatedAt;
 
     db.sessions = db.sessions.filter((session) => session.userId !== userId);
 
     return toPublicClientUser(user);
   });
+
+  if (hasSupabaseCreds()) {
+    const fields: Partial<AuthUserRow> = {
+      id: nextUserId,
+      name: normalized.username,
+      username: normalized.username,
+      insurer_id: makeInsurerId(normalized.insurerName),
+      insurer_name: normalized.insurerName,
+      password_hash: passwordHash,
+      updated_at: updatedAt,
+    };
+    updateUser(userId, fields).catch((err) =>
+      logger.warn("Supabase user mirror failed (update):", err)
+    );
+  }
+
+  return result;
 }
 
 export async function deleteClientUser(userId: string) {
@@ -580,17 +615,21 @@ export async function deleteClientUser(userId: string) {
     return;
   }
 
-  return mutateAuthDatabase((db) => {
+  await mutateAuthDatabase((db) => {
     const user = db.users.find((entry) => entry.id === userId);
     if (!user || user.role !== "client") {
       throw new HttpError(404, "Client user not found.");
     }
-
     if (user.builtIn) {
       throw new HttpError(403, "Built-in client users cannot be deleted.");
     }
-
     db.users = db.users.filter((entry) => entry.id !== userId);
     db.sessions = db.sessions.filter((session) => session.userId !== userId);
   });
+
+  if (hasSupabaseCreds()) {
+    deleteUser(userId).catch((err) =>
+      logger.warn("Supabase user mirror failed (delete):", err)
+    );
+  }
 }

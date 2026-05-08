@@ -51,18 +51,11 @@
   ],
   "sessions": [
     {
-      "token": "e04b155159dbcdccace453c3600c97472f4619c4ca9f48d7deaffa983e4cc76d",
-      "userId": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
-      "createdAt": "2026-05-07T14:48:07.890Z",
-      "lastSeenAt": "2026-05-07T23:24:57.329Z",
-      "expiresAt": "2026-05-08T02:48:07.890Z"
-    },
-    {
-      "token": "12761f0dcfcc59deb5e8968ddebd67e09e90963765f95d57ce9aa5df135320da",
+      "token": "a8974b9f0e5ee2f20f1067141e96ca244c757ecda938232d2b1ade74c0b7eb2e",
       "userId": "user-koki",
-      "createdAt": "2026-05-07T23:18:28.777Z",
-      "lastSeenAt": "2026-05-08T00:24:15.574Z",
-      "expiresAt": "2026-05-08T11:18:28.777Z"
+      "createdAt": "2026-05-08T18:43:13.174Z",
+      "lastSeenAt": "2026-05-08T19:04:37.225Z",
+      "expiresAt": "2026-05-09T06:43:13.174Z"
     }
   ]
 }
