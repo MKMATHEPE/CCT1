@@ -76,7 +76,7 @@ export default function Sidebar({ theme, isOpen, onClose }: Props) {
       <aside
         aria-hidden={!isOpen}
         className={`
-          fixed inset-y-0 left-0 z-40 w-72 overflow-y-auto border-r
+          fixed inset-y-0 left-0 z-40 w-[min(20rem,calc(100vw-2rem))] overflow-y-auto border-r
           transition-transform duration-300 ease-in-out
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           md:static md:inset-y-auto md:z-auto md:overflow-hidden md:border-r
@@ -85,7 +85,7 @@ export default function Sidebar({ theme, isOpen, onClose }: Props) {
         `}
         style={sidebarBg}
       >
-        <div className="min-h-full p-6 flex flex-col gap-6">
+        <div className="min-h-full p-4 sm:p-6 flex flex-col gap-5 sm:gap-6">
           <div className="h-1 hidden md:block" />
 
           <div className="flex-1 flex flex-col gap-4">

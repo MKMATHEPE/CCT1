@@ -145,7 +145,7 @@ export default function App() {
           onClose={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 p-4 md:p-6 bg-bg space-y-4 md:space-y-6 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 bg-bg space-y-4 md:space-y-6 overflow-y-auto overflow-x-hidden">
           <ThemeContext.Provider value={theme}>
           <Routes>
             <Route

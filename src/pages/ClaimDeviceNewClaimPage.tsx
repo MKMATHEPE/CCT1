@@ -676,7 +676,7 @@ export default function ClaimDeviceNewClaimPage() {
   return (
     <div>
       <section
-        className="rounded-2xl p-6"
+        className="rounded-2xl p-4 sm:p-6"
         style={{ background: sectionBg, border: sectionBorder }}
       >
         <div>
@@ -753,7 +753,7 @@ export default function ClaimDeviceNewClaimPage() {
             </div>
           )}
 
-          <div className="mt-4 flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <input
               ref={fileInputRef}
               type="file"
@@ -764,21 +764,21 @@ export default function ClaimDeviceNewClaimPage() {
             />
             <label
               htmlFor="excelUpload"
-              className="inline-flex cursor-pointer items-center rounded-xl border px-4 py-2.5 text-sm font-medium transition"
+              className="inline-flex min-w-0 cursor-pointer items-center justify-center rounded-xl border px-4 py-2.5 text-center text-sm font-medium transition sm:justify-start"
               style={{
                 background: hasFile ? "rgba(249,115,22,0.1)" : (isLight ? "rgba(198,215,229,0.15)" : "rgba(255,255,255,0.05)"),
                 borderColor: hasFile ? "rgba(249,115,22,0.3)" : dragBorderIdle,
                 color: hasFile ? "#fb923c" : subTextColor,
               }}
             >
-              {importFileName}
+              <span className="truncate">{importFileName}</span>
             </label>
 
             <button
               type="button"
               onClick={handleExcelUpload}
               disabled={isSubmitting}
-              className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+              className="w-full rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50 sm:w-auto"
               style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", boxShadow: "0 4px 16px rgba(239,68,68,0.25)" }}
             >
               {isSubmitting ? "Importing..." : "Import Claims"}
@@ -800,7 +800,7 @@ export default function ClaimDeviceNewClaimPage() {
 
         <form
           id="claimForm"
-          className="mt-2 grid gap-5 lg:grid-cols-2"
+          className="mt-2 grid gap-4 sm:gap-5 lg:grid-cols-2"
           onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}
         >
           <div className="space-y-2">
@@ -896,12 +896,12 @@ export default function ClaimDeviceNewClaimPage() {
           </div>
         </form>
 
-        <div className="mt-6 flex justify-end">
+        <div className="mt-6 flex justify-stretch sm:justify-end">
           <button
             type="submit"
             form="claimForm"
             disabled={isSubmitting}
-            className="rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50"
+            className="w-full rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition disabled:opacity-50 sm:w-auto"
             style={{ background: "linear-gradient(135deg,#f97316,#ef4444)", boxShadow: "0 4px 16px rgba(239,68,68,0.25)" }}
           >
             {isSubmitting ? "Submitting..." : "Log Claim"}

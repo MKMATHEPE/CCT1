@@ -40,9 +40,11 @@ const TopBar = ({
 
   const activeTitle =
     pageTitles[
-      Object.keys(pageTitles).find((path) =>
-        location.pathname.startsWith(path)
-      ) ?? "/"
+      Object.keys(pageTitles)
+        .sort((left, right) => right.length - left.length)
+        .find((path) =>
+          path === "/" ? location.pathname === "/" : location.pathname.startsWith(path)
+        ) ?? "/"
     ] ?? "Dashboard";
 
   useEffect(() => {
@@ -74,7 +76,7 @@ const TopBar = ({
 
   return (
     <header
-      className="min-h-[60px] flex items-center px-6 py-3 gap-6"
+      className="min-h-[56px] sm:min-h-[60px] flex items-center px-3 sm:px-6 py-2.5 sm:py-3 gap-3 sm:gap-6"
       style={isDark ? {
         background: "#111827",
         borderBottom: "1px solid rgba(255,255,255,0.07)",
@@ -86,7 +88,7 @@ const TopBar = ({
       }}
     >
       {/* Left */}
-      <div className="flex flex-1 items-center gap-3">
+      <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3">
         <button
           type="button"
           onClick={onToggleSidebar}
@@ -105,18 +107,18 @@ const TopBar = ({
           <FontAwesomeIcon icon={faBars} className="w-3.5 h-3.5" />
         </button>
 
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.22em] font-medium" style={{ color: isDark ? "#475569" : "#94a3b8" }}>
+        <div className="min-w-0">
+          <div className="hidden sm:block text-[10px] uppercase tracking-[0.22em] font-medium" style={{ color: isDark ? "#475569" : "#94a3b8" }}>
             Claims Centre of Truth
           </div>
-          <div className="text-base font-semibold" style={{ color: isDark ? "#f8fafc" : "#5b6f84" }}>
+          <div className="truncate text-sm sm:text-base font-semibold" style={{ color: isDark ? "#f8fafc" : "#5b6f84" }}>
             {activeTitle}
           </div>
         </div>
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <button
           type="button"
           onClick={onToggleTheme}
@@ -139,7 +141,7 @@ const TopBar = ({
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 transition"
+            className="flex items-center gap-1.5 sm:gap-2.5 rounded-lg px-1.5 sm:px-2.5 py-1.5 transition"
             style={isDark ? { color: "#94a3b8" } : { color: "#64748b" }}
           >
             <div
