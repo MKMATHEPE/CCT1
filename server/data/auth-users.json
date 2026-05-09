@@ -49,5 +49,13 @@
       "passwordHash": "e6b943e2ad8668d283de0b49a43c4545:bcab0eb3b650f4effc3c55b17528be9ea20115308c5eeb68e8a2bc3609a53666ba33e9441c8d908ab74dcb042559689755add731eb4578de7eae12823ab3d173"
     }
   ],
-  "sessions": []
+  "sessions": [
+    {
+      "token": "37bf9f79d887da3d3e9bafb7aef803563699086b3312c121529aafd4867ac115",
+      "userId": "user-koki",
+      "createdAt": "2026-05-09T17:05:00.912Z",
+      "lastSeenAt": "2026-05-09T17:05:38.393Z",
+      "expiresAt": "2026-05-10T05:05:00.912Z"
+    }
+  ]
 }

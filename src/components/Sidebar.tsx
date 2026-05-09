@@ -91,7 +91,7 @@ export default function Sidebar({ theme, isOpen, onClose }: Props) {
           <div className="flex-1 flex flex-col gap-4">
             <nav className="flex-1 flex flex-col gap-3">
               <div>
-                <NavLink to="/" className={({ isActive }) => navClass(isActive)}>
+                <NavLink to="/" className={() => navClass(expanded.dashboard)}>
                   <FontAwesomeIcon icon={faChartLine} className="w-4 h-4" />
                   <span>Dashboard</span>
                 </NavLink>
@@ -114,7 +114,7 @@ export default function Sidebar({ theme, isOpen, onClose }: Props) {
               </div>
 
               <div>
-                <NavLink to="/claim-device" className={({ isActive }) => navClass(isActive)}>
+                <NavLink to="/search/identifier" className={() => navClass(expanded.claimDevice)}>
                   <FontAwesomeIcon icon={faClipboardCheck} className="w-4 h-4" />
                   <span>Device Claims</span>
                 </NavLink>
@@ -137,7 +137,7 @@ export default function Sidebar({ theme, isOpen, onClose }: Props) {
               </div>
 
               <div>
-                <NavLink to="/settings/session" className={({ isActive }) => navClass(isActive)}>
+                <NavLink to="/settings/session" className={() => navClass(expanded.settings)}>
                   <FontAwesomeIcon icon={faGear} className="w-4 h-4" />
                   <span>Settings</span>
                 </NavLink>
