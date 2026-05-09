@@ -31,160 +31,7 @@ const FEATURES = [
   },
 ];
 
-// ─── World map paths ────────────────────────────────────────────────────────
-// Coordinate system (Mercator-like, viewBox 0 0 960 540):
-//   x = (lon + 180) / 360 * 960
-//   y = (75  - lat) / 135 * 540
-
-// Africa — detailed clockwise trace
-const PATH_AFRICA = `
-  M 467,160 L 480,153 L 492,151 L 504,151 L 512,153
-  L 520,156 L 530,155 L 540,158 L 550,160 L 558,164
-  L 563,172 L 557,174 L 569,177 L 571,181 L 564,188
-  L 568,198 L 576,212 L 583,226 L 588,240 L 596,250
-  L 616,256 L 608,268 L 600,283 L 592,298
-  L 587,315 L 582,335 L 575,358 L 567,382
-  L 556,408 L 545,424 L 534,432 L 528,436
-  L 516,430 L 504,416 L 491,400 L 478,383
-  L 464,364 L 451,343 L 440,322 L 432,304
-  L 424,288 L 416,278 L 407,273 L 400,270
-  L 394,264 L 392,255 L 396,247 L 405,243
-  L 412,238 L 417,230 L 418,221 L 415,212
-  L 409,203 L 402,194 L 396,184 L 392,175
-  L 396,167 L 405,162 L 416,159 L 427,157
-  L 436,156 L 444,157 L 450,159 L 458,160 Z
-`;
-
-// Madagascar — island east of Mozambique
-const PATH_MADAGASCAR = `
-  M 601,302 L 610,294 L 618,298 L 623,313
-  L 625,330 L 624,348 L 620,366 L 613,381
-  L 604,388 L 595,382 L 590,366 L 588,348
-  L 589,330 L 592,314 Z
-`;
-
-// Europe — Iberian, French, Italian, Scandinavian peninsulas
-const PATH_EUROPE = `
-  M 456,152 L 462,147 L 470,145 L 480,145
-  L 488,148 L 496,145 L 507,143 L 516,142
-  L 524,144 L 532,140 L 542,135 L 554,131
-  L 564,128 L 572,130 L 582,126 L 592,128
-  L 600,132 L 610,130 L 618,128 L 624,135
-  L 622,143 L 615,148 L 616,156 L 620,165
-  L 616,174 L 608,182 L 598,188 L 586,191
-  L 574,188 L 562,186 L 556,192 L 548,198
-  L 536,202 L 524,196 L 519,186 L 524,177
-  L 528,169 L 524,162 L 514,159 L 503,163
-  L 496,170 L 490,178 L 484,172 L 478,163
-  L 482,155 L 484,148 L 476,146 L 466,149
-  L 459,157 L 455,163 L 450,157 Z
-`;
-
-// Scandinavia — Norway/Sweden peninsula
-const PATH_SCANDINAVIA = `
-  M 524,76 L 532,68 L 540,62 L 550,58
-  L 558,56 L 566,58 L 572,64 L 570,74
-  L 564,82 L 558,88 L 553,96 L 558,104
-  L 564,112 L 568,122 L 562,130 L 554,134
-  L 546,132 L 537,128 L 530,120 L 526,112
-  L 522,104 L 520,96 L 518,87 L 520,80 Z
-`;
-
-// Great Britain
-const PATH_GB = `
-  M 468,101 L 476,96 L 484,94 L 492,98
-  L 496,106 L 492,114 L 484,120 L 476,124
-  L 468,120 L 464,112 Z
-`;
-
-// North America — simplified but recognizable (Alaska + Canada + USA + Mexico)
-const PATH_NORTH_AMERICA = `
-  M 32,42 L 52,34 L 70,32 L 88,34
-  L 104,40 L 116,50 L 110,62 L 97,68
-  L 88,78 L 96,88 L 108,96 L 122,96
-  L 138,92 L 152,88 L 164,88 L 174,92
-  L 182,100 L 188,112 L 192,126
-  L 198,138 L 208,148 L 220,154
-  L 234,156 L 248,157 L 262,156
-  L 274,157 L 284,164 L 292,174
-  L 298,185 L 296,198 L 286,208
-  L 272,216 L 258,222 L 248,232
-  L 238,242 L 226,250 L 214,258
-  L 203,256 L 195,244 L 192,232
-  L 186,222 L 176,215 L 164,212
-  L 152,217 L 142,226 L 130,232
-  L 116,226 L 102,212 L 90,196
-  L 78,180 L 66,163 L 56,146
-  L 48,130 L 41,114 L 36,98
-  L 30,82 L 28,66 L 30,52 Z
-`;
-
-// Greenland
-const PATH_GREENLAND = `
-  M 290,18 L 308,12 L 326,10 L 342,12
-  L 354,20 L 358,32 L 352,44 L 340,52
-  L 324,56 L 308,52 L 296,44 L 288,34 Z
-`;
-
-// South America — teardrop, widest at north, narrows to southern cone
-const PATH_SOUTH_AMERICA = `
-  M 270,222 L 284,218 L 298,216 L 312,218
-  L 324,224 L 334,232 L 342,244
-  L 348,258 L 352,274 L 356,292
-  L 360,312 L 363,334 L 364,357
-  L 362,380 L 356,404 L 347,426
-  L 334,446 L 318,463 L 300,474
-  L 282,478 L 264,474 L 248,463
-  L 236,449 L 228,432 L 223,414
-  L 221,395 L 224,375 L 228,355
-  L 228,334 L 225,312 L 218,291
-  L 212,272 L 211,254 L 217,239
-  L 228,228 L 242,222 L 256,220 Z
-`;
-
-// Asia — Arabia Peninsula + Indian subcontinent visible on the right
-const PATH_ARABIA = `
-  M 628,182 L 638,176 L 648,172 L 656,176
-  L 660,186 L 658,198 L 652,210 L 644,220
-  L 636,226 L 628,222 L 622,212
-  L 618,200 L 620,190 Z
-`;
-
-const PATH_INDIA = `
-  M 668,168 L 678,162 L 690,158 L 702,158
-  L 714,162 L 722,170 L 726,182 L 724,196
-  L 718,210 L 708,222 L 696,230
-  L 684,224 L 675,214 L 669,202
-  L 665,190 Z
-`;
-
-// Part of mainland Asia (Turkey → Central Asia visible at top right)
-const PATH_ASIA_COAST = `
-  M 574,130 L 586,124 L 600,118 L 614,115
-  L 628,115 L 642,118 L 654,124 L 664,132
-  L 672,142 L 676,154 L 674,164 L 666,170
-  L 656,174 L 643,172 L 632,168 L 622,162
-  L 612,156 L 600,152 L 588,148 L 578,143 Z
-`;
-
-// Australia — Gulf of Carpentaria indentation + Cape York + Great Australian Bight
-const PATH_AUSTRALIA = `
-  M 784,338 L 800,330 L 816,326 L 832,327
-  L 844,333 L 852,342 L 854,354
-  L 848,364 L 836,368 L 826,362
-  L 822,352 L 820,344 L 828,342
-  L 830,350 L 832,358
-  L 840,364 L 852,366 L 860,374
-  L 864,386 L 866,400 L 864,414
-  L 860,428 L 852,440 L 840,450
-  L 826,456 L 810,458 L 794,456
-  L 778,450 L 764,440 L 752,426
-  L 743,410 L 738,393 L 738,376
-  L 744,361 L 754,350 L 766,343
-  L 776,340 Z
-`;
-
-// ────────────────────────────────────────────────────────────────────────────
+const WORLD_MAP_ASSET = "/world-map.svg";
 
 export default function LoggedOutPage({ onLogin }: Props) {
   const [username, setUsername] = useState("");
@@ -218,15 +65,61 @@ export default function LoggedOutPage({ onLogin }: Props) {
       `}</style>
 
       <div
-        className="min-h-screen flex text-white"
+        className="relative min-h-screen overflow-hidden flex text-white"
         style={{ animation: "page-in .3s ease both", background: "#0b1120" }}
       >
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle at 44% 45%,rgba(30,64,95,0.34),rgba(15,35,58,0.18) 58%,rgba(2,8,23,0) 100%)",
+          }}
+        />
+
+        <img
+          src={WORLD_MAP_ASSET}
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full select-none object-cover opacity-[0.16]"
+          style={{
+            filter: "drop-shadow(0 12px 18px rgba(2,6,23,0.45))",
+            mixBlendMode: "screen",
+          }}
+        />
+
+        <svg
+          viewBox="0 0 960 540"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 h-full w-full"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g stroke="rgba(172,201,213,0.014)" strokeWidth="0.25" fill="none">
+            {[15,30,45,60,75,-15,-30,-45,-60].map((lat) => (
+              <line key={lat} x1="0" y1={(75 - lat) / 135 * 540} x2="960" y2={(75 - lat) / 135 * 540} />
+            ))}
+            {[-165,-150,-135,-120,-105,-90,-75,-60,-45,-30,-15,0,15,30,45,60,75,90,105,120,135,150,165].map((lon) => (
+              <line
+                key={lon}
+                x1={(lon + 180) / 360 * 960}
+                y1="0"
+                x2={(lon + 180) / 360 * 960}
+                y2="540"
+                opacity={lon % 30 === 0 ? 0.52 : 0.16}
+              />
+            ))}
+          </g>
+
+          <line x1="0" y1={75 / 135 * 540} x2="960" y2={75 / 135 * 540} stroke="rgba(214,235,237,0.028)" strokeWidth="0.35" />
+          <line x1="0" y1={(75 - 23.5) / 135 * 540} x2="960" y2={(75 - 23.5) / 135 * 540} stroke="rgba(249,115,22,0.03)" strokeWidth="0.3" strokeDasharray="4 8" />
+          <line x1="0" y1={(75 + 23.5) / 135 * 540} x2="960" y2={(75 + 23.5) / 135 * 540} stroke="rgba(249,115,22,0.03)" strokeWidth="0.3" strokeDasharray="4 8" />
+        </svg>
 
         {/* ── Left brand panel ── */}
         <div
-          className="hidden lg:flex lg:w-[55%] relative flex-col justify-between p-14 overflow-hidden"
+          className="relative z-10 hidden lg:flex lg:w-[55%] flex-col justify-between p-14 overflow-hidden"
           style={{
-            background: "linear-gradient(160deg,#0f1e35 0%,#0b1422 100%)",
+            background: "linear-gradient(160deg,rgba(15,30,53,0.72) 0%,rgba(11,20,34,0.58) 100%)",
             borderRight: "1px solid rgba(255,255,255,0.06)",
           }}
         >
@@ -235,82 +128,6 @@ export default function LoggedOutPage({ onLogin }: Props) {
             className="pointer-events-none absolute inset-y-0 right-0 w-24"
             style={{ background: "linear-gradient(to right,transparent,rgba(0,0,0,0.2))" }}
           />
-
-          {/* ── World map watermark ── */}
-          <svg
-            viewBox="0 0 960 540"
-            preserveAspectRatio="xMidYMid slice"
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            {/* Ocean tint — very subtle so continents read against it */}
-            <rect width="960" height="540" fill="rgba(148,163,184,0.015)" />
-
-            {/* Continents — each slightly different opacity for depth */}
-
-            {/* North America */}
-            <path d={PATH_NORTH_AMERICA} fill="white" opacity="0.04" />
-            <path d={PATH_GREENLAND}     fill="white" opacity="0.03" />
-
-            {/* South America */}
-            <path d={PATH_SOUTH_AMERICA} fill="white" opacity="0.04" />
-
-            {/* Europe */}
-            <path d={PATH_EUROPE}        fill="white" opacity="0.05" />
-            <path d={PATH_SCANDINAVIA}   fill="white" opacity="0.04" />
-            <path d={PATH_GB}            fill="white" opacity="0.04" />
-
-            {/* Africa — brightest: primary market */}
-            <path d={PATH_AFRICA}        fill="white" opacity="0.09" />
-            <path d={PATH_MADAGASCAR}    fill="white" opacity="0.07" />
-
-            {/* Asia */}
-            <path d={PATH_ASIA_COAST}    fill="white" opacity="0.04" />
-            <path d={PATH_ARABIA}        fill="white" opacity="0.05" />
-            <path d={PATH_INDIA}         fill="white" opacity="0.05" />
-
-            {/* Australia */}
-            <path d={PATH_AUSTRALIA}     fill="white" opacity="0.04" />
-
-            {/* Subtle graticule lines (lat/lon grid) */}
-            <g stroke="rgba(255,255,255,0.025)" strokeWidth="0.5" fill="none">
-              {/* Latitude lines every 15° */}
-              {[15,30,45,60].map(lat => {
-                const y = (75 - lat) / 135 * 540;
-                return <line key={lat} x1="0" y1={y} x2="960" y2={y} />;
-              })}
-              {[-15,-30,-45].map(lat => {
-                const y = (75 - lat) / 135 * 540;
-                return <line key={lat} x1="0" y1={y} x2="960" y2={y} />;
-              })}
-              {/* Longitude lines every 30° */}
-              {[-150,-120,-90,-60,-30,0,30,60,90,120,150].map(lon => {
-                const x = (lon + 180) / 360 * 960;
-                return <line key={lon} x1={x} y1="0" x2={x} y2="540" />;
-              })}
-            </g>
-
-            {/* Equator — slightly more visible */}
-            <line
-              x1="0" y1={75 / 135 * 540}
-              x2="960" y2={75 / 135 * 540}
-              stroke="rgba(255,255,255,0.05)" strokeWidth="1"
-            />
-
-            {/* Tropic of Cancer */}
-            <line
-              x1="0" y1={(75 - 23.5) / 135 * 540}
-              x2="960" y2={(75 - 23.5) / 135 * 540}
-              stroke="rgba(249,115,22,0.06)" strokeWidth="0.75" strokeDasharray="4 6"
-            />
-
-            {/* Tropic of Capricorn */}
-            <line
-              x1="0" y1={(75 + 23.5) / 135 * 540}
-              x2="960" y2={(75 + 23.5) / 135 * 540}
-              stroke="rgba(249,115,22,0.06)" strokeWidth="0.75" strokeDasharray="4 6"
-            />
-          </svg>
 
           {/* Logo */}
           <div className="relative z-10 anim-rise" style={{ animationDelay: "0ms" }}>
@@ -397,8 +214,8 @@ export default function LoggedOutPage({ onLogin }: Props) {
 
         {/* ── Right form panel ── */}
         <div
-          className="flex-1 flex flex-col items-center justify-center px-8 py-12"
-          style={{ background: "#0b1120" }}
+          className="relative z-10 flex-1 flex flex-col items-center justify-center px-8 py-12"
+          style={{ background: "linear-gradient(90deg,rgba(11,17,32,0.5),rgba(11,17,32,0.9) 36%,rgba(11,17,32,0.98))" }}
         >
           {/* Mobile logo */}
           <div className="lg:hidden mb-10 anim-rise flex items-center gap-2.5">

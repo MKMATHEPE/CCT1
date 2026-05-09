@@ -51,11 +51,11 @@
   ],
   "sessions": [
     {
-      "token": "37bf9f79d887da3d3e9bafb7aef803563699086b3312c121529aafd4867ac115",
+      "token": "48add04453d5dd625fad037ad1670991f4aca95cdbffe302277f3202844a31e8",
       "userId": "user-koki",
-      "createdAt": "2026-05-09T17:05:00.912Z",
-      "lastSeenAt": "2026-05-09T17:05:38.393Z",
-      "expiresAt": "2026-05-10T05:05:00.912Z"
+      "createdAt": "2026-05-09T17:44:46.252Z",
+      "lastSeenAt": "2026-05-09T18:04:21.423Z",
+      "expiresAt": "2026-05-10T05:44:46.252Z"
     }
   ]
 }

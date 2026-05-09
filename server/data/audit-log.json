@@ -76,5 +76,32 @@
     "details": {
       "role": "admin"
     }
+  },
+  {
+    "id": "18629e92-ce69-4817-814c-69c94855aca1",
+    "timestampUtc": "2026-05-09T17:38:43.212Z",
+    "action": "LOGOUT",
+    "target": "user-koki",
+    "outcome": "SUCCESS",
+    "actor": "user-koki",
+    "actorName": "Koki",
+    "actorRole": "admin",
+    "insurerName": "KokInsure",
+    "context": "User logout"
+  },
+  {
+    "id": "801e110e-44eb-49b4-af03-4b8dfb8f4953",
+    "timestampUtc": "2026-05-09T17:44:46.261Z",
+    "action": "LOGIN",
+    "target": "user-koki",
+    "outcome": "SUCCESS",
+    "actor": "user-koki",
+    "actorName": "Koki",
+    "actorRole": "admin",
+    "insurerName": "KokInsure",
+    "context": "User login",
+    "details": {
+      "role": "admin"
+    }
   }
 ]
