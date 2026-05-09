@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { TopBar } from "./components/TopBar";
 import Sidebar from "./components/Sidebar";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+
 import DashboardPage from "./pages/DashboardPage";
 import AdminOverviewDashboardPage from "./pages/AdminOverviewDashboardPage";
 import AdminClientDashboardsPage from "./pages/AdminClientDashboardsPage";
@@ -27,7 +28,9 @@ export default function App() {
     const savedTheme = localStorage.getItem("cct:theme");
     return savedTheme === "light" ? "light" : "dark";
   });
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => typeof window !== "undefined" && window.innerWidth >= 768
+  );
   const { user, isLoading, login, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -135,10 +138,14 @@ export default function App() {
         onLogout={logout}
       />
 
-      <div className="flex-1 min-h-0 flex flex-col md:flex-row">
-        <Sidebar theme={theme} isOpen={sidebarOpen} />
+      <div className="flex-1 min-h-0 flex md:flex-row">
+        <Sidebar
+          theme={theme}
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
 
-        <main className="flex-1 p-6 bg-bg space-y-6 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 bg-bg space-y-4 md:space-y-6 overflow-y-auto overflow-x-hidden">
           <ThemeContext.Provider value={theme}>
           <Routes>
             <Route

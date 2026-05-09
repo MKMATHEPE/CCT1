@@ -334,19 +334,8 @@ export default function LoggedOutPage({ onLogin }: Props) {
           <div className="relative z-10 space-y-9">
             <div className="space-y-5">
               <div
-                className="anim-rise inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium"
-                style={{
-                  animationDelay: "60ms",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  color: "#94a3b8",
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                  style={{ animation: "status-blink 2.4s ease-in-out infinite" }}
-                />
-                Platform operational
+                className="anim-rise inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium">
+ 
               </div>
 
               <h1
@@ -396,7 +385,7 @@ export default function LoggedOutPage({ onLogin }: Props) {
             {[
               { value: "Multi-insurer", label: "Data network" },
               { value: "Real-time",     label: "Risk scoring" },
-              { value: "End-to-end",    label: "Audit trail"  },
+              { value: "Traceable",    label: "Event history"  },
             ].map((s) => (
               <div key={s.value}>
                 <p className="text-sm font-semibold text-white">{s.value}</p>
@@ -447,7 +436,7 @@ export default function LoggedOutPage({ onLogin }: Props) {
                   autoComplete="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="your.username"
+                  placeholder="Username"
                   className="w-full rounded-lg px-3.5 py-2.5 text-sm text-white outline-none transition-all"
                   style={{ background: "#0f172a", border: "1px solid rgba(255,255,255,0.08)", caretColor: "#f97316" }}
                   onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(249,115,22,0.5)"; e.currentTarget.style.boxShadow = "0 0 0 3px rgba(249,115,22,0.08)"; }}
@@ -517,10 +506,6 @@ export default function LoggedOutPage({ onLogin }: Props) {
               </button>
             </form>
           </div>
-
-          <p className="mt-6 text-xs text-center" style={{ color: "#1e293b" }}>
-            Authorised access only · CCT Intelligence
-          </p>
         </div>
       </div>
     </>
