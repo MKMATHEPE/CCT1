@@ -84,27 +84,27 @@ function MetricPanel({ card }: { card: MetricCard }) {
   const border = isLight ? "border-[rgba(198,215,229,0.42)]" : "border-white/10";
   const hoverBorder = isLight ? "hover:border-[rgba(198,215,229,0.7)]" : "hover:border-white/20";
   return (
-    <div className={`rounded-2xl border ${border} ${cardBg} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 ${hoverBorder}`}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className={`text-sm font-medium ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.label}</p>
-          <p className={`mt-3 text-3xl font-semibold tracking-tight ${isLight ? "text-[#1e293b]" : "text-white"}`}>
+    <div className={`rounded-2xl border ${border} ${cardBg} p-4 sm:p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 ${hoverBorder}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className={`text-xs font-medium sm:text-sm ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.label}</p>
+          <p className={`mt-2 truncate text-2xl font-semibold tracking-tight sm:mt-3 sm:text-3xl ${isLight ? "text-[#1e293b]" : "text-white"}`}>
             {card.value}
           </p>
         </div>
         <div
-          className="flex h-11 w-11 items-center justify-center rounded-2xl"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl sm:h-11 sm:w-11"
           style={{ backgroundColor: `${card.accent}1f`, color: card.accent }}
         >
           <FontAwesomeIcon icon={card.icon} className="h-4 w-4" />
         </div>
       </div>
-      <div className="mt-5 flex items-center gap-2">
+      <div className="mt-4 flex items-start gap-2 sm:mt-5">
         <span
-          className="h-2.5 w-2.5 rounded-full"
+          className="mt-1 h-2 w-2 shrink-0 rounded-full sm:h-2.5 sm:w-2.5"
           style={{ backgroundColor: card.accent }}
         />
-        <span className={`text-xs ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.note}</span>
+        <span className={`text-xs leading-snug ${isLight ? "text-[#8296a8]" : "text-slate-400"}`}>{card.note}</span>
       </div>
     </div>
   );
@@ -127,10 +127,10 @@ function Panel({
   const border = isLight ? "border-[rgba(198,215,229,0.42)]" : "border-white/10";
   return (
     <section
-      className={`min-w-0 rounded-2xl border ${border} ${cardBg} p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] ${className}`.trim()}
+      className={`min-w-0 rounded-2xl border ${border} ${cardBg} p-4 sm:p-5 shadow-[0_20px_45px_rgba(2,6,23,0.34)] ${className}`.trim()}
     >
-      <div className="mb-4">
-        <h3 className={`text-lg font-semibold ${isLight ? "text-[#1e293b]" : "text-white"}`}>{title}</h3>
+      <div className="mb-3 sm:mb-4">
+        <h3 className={`text-base font-semibold sm:text-lg ${isLight ? "text-[#1e293b]" : "text-white"}`}>{title}</h3>
         {subtitle && <p className={`mt-1 text-sm ${isLight ? "text-[#5b6f84]" : "text-slate-400"}`}>{subtitle}</p>}
       </div>
       {children}
@@ -219,24 +219,30 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="grid gap-6 xl:grid-cols-12">
-      <section className={`xl:col-span-12 rounded-[28px] p-6 ${
+    <div className="grid gap-4 sm:gap-6 xl:grid-cols-12">
+      <section className={`xl:col-span-12 rounded-2xl p-4 sm:rounded-[28px] sm:p-6 ${
         theme === "light"
           ? "bg-[#f5f9fd] border border-[rgba(198,215,229,0.42)] shadow-[0_2px_8px_rgba(130,168,200,0.10),_0_8px_24px_rgba(130,168,200,0.08)]"
           : "bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.16),_transparent_30%),linear-gradient(180deg,#0f172a_0%,#020617_100%)] border border-white/10 shadow-[0_28px_60px_rgba(2,6,23,0.42)]"
       }`}>
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
-          <div>
-            <h1 className={`text-4xl font-semibold tracking-tight ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0">
+            <h1 className={`text-2xl font-semibold tracking-tight sm:text-4xl ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
               Dashboard
             </h1>
-            <p className={`mt-2 text-base ${theme === "light" ? "text-[#5b6f84]" : "text-slate-300"}`}>
+            <p className={`mt-1 truncate text-sm sm:mt-2 sm:text-base ${theme === "light" ? "text-[#5b6f84]" : "text-slate-300"}`}>
               {insurerName} Dashboard
             </p>
           </div>
-          <div className={`rounded-2xl border px-4 py-3 text-sm ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8] text-[#5b6f84]" : "border-white/10 bg-slate-950/55 text-slate-300"}`}>
-            <div>Claims logged: {formatNumber(stats?.totalClaims ?? 0)}</div>
-            <div>Searches logged: {formatNumber(stats?.totalSearches ?? 0)}</div>
+          <div className={`grid grid-cols-2 gap-3 rounded-2xl border px-4 py-3 text-sm xl:block xl:space-y-1 ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8] text-[#5b6f84]" : "border-white/10 bg-slate-950/55 text-slate-300"}`}>
+            <div>
+              <span className="block text-xs opacity-70">Claims</span>
+              <span className="font-semibold">{formatNumber(stats?.totalClaims ?? 0)}</span>
+            </div>
+            <div>
+              <span className="block text-xs opacity-70">Searches</span>
+              <span className="font-semibold">{formatNumber(stats?.totalSearches ?? 0)}</span>
+            </div>
           </div>
         </div>
       </section>
@@ -257,14 +263,14 @@ export default function DashboardPage() {
 
       <div className="xl:col-span-4">
         <Panel title="Claims by Status" subtitle="Read from /dashboard/claims" className="h-full">
-          <ChartContainer className="h-[300px]">
+          <ChartContainer className="h-[220px] sm:h-[300px]">
             <PieChart>
               <Pie
                 data={claimStatusData}
                 dataKey="value"
                 nameKey="name"
-                innerRadius={78}
-                outerRadius={118}
+                innerRadius="48%"
+                outerRadius="72%"
                 paddingAngle={3}
               >
                 {claimStatusData.map((entry, index) => (
@@ -284,7 +290,7 @@ export default function DashboardPage() {
                   color: "#fff",
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
             </PieChart>
           </ChartContainer>
         </Panel>
@@ -292,7 +298,7 @@ export default function DashboardPage() {
 
       <div className="xl:col-span-8">
         <Panel title="Search Outcomes" subtitle="Read from /dashboard/searches" className="h-full">
-          <ChartContainer className="h-[300px] xl:h-[320px]">
+          <ChartContainer className="h-[230px] sm:h-[300px] xl:h-[320px]">
             <BarChart data={searchOutcomeData} barCategoryGap={28}>
               <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
               <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -315,7 +321,7 @@ export default function DashboardPage() {
 
       <div className="xl:col-span-7">
         <Panel title="Monthly Activity" subtitle="Combined claims and searches" className="h-full">
-          <ChartContainer className="h-[320px] xl:h-[360px]">
+          <ChartContainer className="h-[250px] sm:h-[320px] xl:h-[360px]">
             <LineChart data={monthlyActivity}>
               <CartesianGrid stroke="rgba(148,163,184,0.12)" vertical={false} />
               <XAxis dataKey="month" stroke="#94a3b8" tickLine={false} axisLine={false} />
@@ -329,7 +335,7 @@ export default function DashboardPage() {
                   color: "#fff",
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
               <Line
                 type="monotone"
                 dataKey="claims"
@@ -354,25 +360,25 @@ export default function DashboardPage() {
           {isLoading ? (
             <div className="py-10 text-sm text-slate-400">Loading dashboard activity...</div>
           ) : stats?.recentActivity.length ? (
-            <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1 sm:max-h-[360px]">
               {stats.recentActivity.map((item) => (
                 <div
                   key={`${item.type}:${item.id}`}
-                  className="rounded-2xl border border-white/6 bg-slate-950/55 px-4 py-4"
+                  className={`rounded-2xl border px-4 py-4 ${theme === "light" ? "border-[rgba(198,215,229,0.42)] bg-[#eaf1f8]" : "border-white/6 bg-slate-950/55"}`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-sm font-medium text-white">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                    <div className="min-w-0">
+                      <div className={`text-sm font-medium ${theme === "light" ? "text-[#1e293b]" : "text-white"}`}>
                         {item.type === "claim" ? "Claim submitted" : "Search completed"}
                       </div>
-                      <div className="mt-1 text-sm text-slate-400">
+                      <div className={`mt-1 break-all text-sm ${theme === "light" ? "text-[#5b6f84]" : "text-slate-400"}`}>
                         {item.deviceName ?? item.imei}
                       </div>
-                      <div className="mt-1 text-xs text-slate-500">
+                      <div className={`mt-1 text-xs ${theme === "light" ? "text-gray-500" : "text-slate-500"}`}>
                         {formatTimestamp(item.timestamp)}
                       </div>
                     </div>
-                    <div className="text-right text-sm">
+                    <div className="text-left text-sm sm:text-right">
                       {item.type === "claim" ? (
                         <>
                           <div className={statusTone(item.status ?? "PENDING")}>
