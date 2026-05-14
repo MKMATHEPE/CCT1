@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TopBar } from "./components/TopBar";
 import Sidebar from "./components/Sidebar";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 
 import DashboardPage from "./pages/DashboardPage";
 import AdminOverviewDashboardPage from "./pages/AdminOverviewDashboardPage";
@@ -35,6 +35,7 @@ export default function App() {
   );
   const { user, isLoading, login, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   async function handleLogin(username: string, password: string) {
     const session = await loginWithPassword(username, password);
@@ -147,6 +148,7 @@ export default function App() {
 
         <main className="flex-1 p-3 sm:p-4 md:p-6 bg-bg space-y-4 md:space-y-6 overflow-y-auto overflow-x-hidden">
           <ThemeContext.Provider value={theme}>
+          <div key={location.pathname} className="cct-page-enter">
           <Routes>
             <Route
               path="/"
@@ -235,6 +237,7 @@ export default function App() {
             <Route path="/settings/system" element={<SettingsPage view="system" />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </div>
           </ThemeContext.Provider>
         </main>
       </div>

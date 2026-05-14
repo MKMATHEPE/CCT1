@@ -103,5 +103,50 @@
     "details": {
       "role": "admin"
     }
+  },
+  {
+    "id": "9ec30c88-4803-42b7-b2dd-a945a393ae68",
+    "timestampUtc": "2026-05-11T04:12:01.078Z",
+    "action": "LOGIN",
+    "target": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "outcome": "SUCCESS",
+    "actor": "ddd97120-8f5d-48bb-9487-8fc7b9a7b7fd",
+    "actorName": "blue",
+    "actorRole": "client",
+    "insurerName": "Blue Insure",
+    "context": "User login",
+    "details": {
+      "role": "client"
+    }
+  },
+  {
+    "id": "fa07992c-c9ae-4f18-b5ef-b0f965445434",
+    "timestampUtc": "2026-05-14T08:18:41.924Z",
+    "action": "LOGIN",
+    "target": "user-koki",
+    "outcome": "SUCCESS",
+    "actor": "user-koki",
+    "actorName": "Koki",
+    "actorRole": "admin",
+    "insurerName": "KokInsure",
+    "context": "User login",
+    "details": {
+      "role": "admin"
+    }
+  },
+  {
+    "id": "28893839-003e-4283-982d-4a0dfd96048c",
+    "timestampUtc": "2026-05-14T08:18:41.957Z",
+    "action": "ROLE_CONTEXT_LOADED",
+    "target": "user-koki",
+    "outcome": "SUCCESS",
+    "actor": "user-koki",
+    "actorName": "Koki",
+    "actorRole": "admin",
+    "insurerName": "KokInsure",
+    "context": "Role context loaded for session",
+    "details": {
+      "role": "admin"
+    }
   }
 ]

@@ -620,7 +620,7 @@ export default function SettingsPage({ view }: Props) {
               duplicate device claims across insurers.
             </p>
             <p className={`mt-4 text-sm ${body}`}>
-              Developed by K Mathepe &amp; J Mlondobuzi
+              Developed by MK MATHEPE
             </p>
           </div>
         </div>
